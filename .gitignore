@@ -22,3 +22,7 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Nyxxi bot runtime data
+bot/profile_data/
+bot/post_index.txt
