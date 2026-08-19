@@ -1,7 +1,7 @@
 const STATE_KEY = "nyxxi-state";
 const THEME_KEY = "nyxxi-theme";
 
-const EMPTY = { characters: [], prompts: [], assets: [] };
+const EMPTY = { characters: [], prompts: [], assets: [], locations: [] };
 
 export function loadState() {
   try {

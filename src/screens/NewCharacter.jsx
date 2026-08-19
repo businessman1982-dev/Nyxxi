@@ -8,7 +8,7 @@ import { uid } from "../lib/utils.js";
 export default function NewCharacter({ nav, addCharacter }) {
   const [name, setName] = useState("");
   const [sheets, setSheets] = useState([]);
-  const [bible, setBible] = useState("");
+  const [look, setLook] = useState("");
 
   return (
     <div>
@@ -27,12 +27,12 @@ export default function NewCharacter({ nav, addCharacter }) {
         </div>
 
         <TextField
-          label="Character bible (optional — you can write this later)"
+          label="Look (optional — you can write this later)"
           area
           rows={5}
-          value={bible}
-          onChange={setBible}
-          placeholder="What has to stay true every time you render them: look, lighting, the things that keep coming out wrong."
+          value={look}
+          onChange={setLook}
+          placeholder="Skin, hair, eyes, face and build. The physical description you'll paste into every image prompt."
         />
 
         <Button
@@ -40,7 +40,7 @@ export default function NewCharacter({ nav, addCharacter }) {
           disabled={!name.trim() || sheets.length === 0}
           onClick={() => {
             const id = uid();
-            addCharacter({ id, name: name.trim(), sheets, bible: bible.trim(), wardrobe: [] });
+            addCharacter({ id, name: name.trim(), sheets, look: look.trim(), bible: "", wardrobe: [] });
             nav({ screen: "character", id });
           }}
         >

@@ -13,13 +13,22 @@ The repo holds two pages:
 ## The app
 
 - **Characters** — create characters with up to two reference sheets each
-- **Character bible** — free-form notes per character describing everything that has
-  to stay consistent between renders (look, lighting, what to never generate).
-  Autosaves, counts words, and copies to the clipboard for pasting into a generator
+- **Look** — the physical description (skin, hair, eyes, build) that goes into every
+  image prompt for that character. Autosaves, counts words, copies in one click
+- **Bible** — who the character is: backstory, personality, how they carry themselves.
+  Kept separate from the look, because only one of the two belongs in a prompt
+- **Locations** — a reusable library of places, each with a description and an
+  optional reference photo
+- **Compose** — hold the look locked, pick an outfit and a location, and get a
+  finished prompt to copy or save to the vault. Reference photos (character sheet,
+  outfit, location) are gathered beside it to attach in your generator
+
+Nyxxi does not generate images — it is where you assemble everything a generator
+needs, so the copy-out is one click and nothing drifts between renders.
 - **Wardrobe** — attach outfit photos and notes to every character
 - **Prompt vault** — save prompts globally or per character, then generate from them
 - **Asset vault** — generation outputs are collected automatically
-- **Search** — one search box across characters, bibles, wardrobe, and prompts
+- **Search** — one search box across characters, looks, bibles, wardrobe, and prompts
 - **Light / dark theme** — follows your system preference, with a manual toggle
 - Everything is stored locally in your browser (`localStorage`) — no account needed
 

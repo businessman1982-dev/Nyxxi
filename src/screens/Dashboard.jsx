@@ -9,9 +9,15 @@ export default function Dashboard({ state, nav, search, setSearch }) {
         characters: state.characters.filter(
           (c) =>
             c.name.toLowerCase().includes(search.toLowerCase()) ||
+            (c.look || "").toLowerCase().includes(search.toLowerCase()) ||
             (c.bible || "").toLowerCase().includes(search.toLowerCase())
         ),
         prompts: state.prompts.filter((p) => p.text.toLowerCase().includes(search.toLowerCase())),
+        locations: state.locations.filter(
+          (l) =>
+            l.name.toLowerCase().includes(search.toLowerCase()) ||
+            (l.note || "").toLowerCase().includes(search.toLowerCase())
+        ),
         wardrobe: state.characters.flatMap((c) =>
           (c.wardrobe || [])
             .filter((w) => w.note.toLowerCase().includes(search.toLowerCase()))
@@ -26,7 +32,7 @@ export default function Dashboard({ state, nav, search, setSearch }) {
         <p style={{ fontSize: 17, fontWeight: 500, margin: "0 0 14px" }}>Dashboard</p>
         <input
           type="text"
-          placeholder="Search characters, bibles, wardrobe, prompts..."
+          placeholder="Search characters, looks, wardrobe, locations, prompts..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           style={{ width: "100%" }}
@@ -35,7 +41,7 @@ export default function Dashboard({ state, nav, search, setSearch }) {
 
       {results ? (
         <div style={{ padding: "12px 16px" }}>
-          {results.characters.length === 0 && results.prompts.length === 0 && results.wardrobe.length === 0 && (
+          {results.characters.length === 0 && results.prompts.length === 0 && results.wardrobe.length === 0 && results.locations.length === 0 && (
             <p style={{ fontSize: 13, color: "var(--text-muted)", textAlign: "center", padding: "24px 0" }}>
               No matches.
             </p>
@@ -72,6 +78,22 @@ export default function Dashboard({ state, nav, search, setSearch }) {
                       <p style={{ fontSize: 13, margin: 0 }}>{w.note}</p>
                       <p style={{ fontSize: 11, color: "var(--text-muted)", margin: 0 }}>{w.characterName}</p>
                     </div>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
+          {results.locations.length > 0 && (
+            <>
+              <p style={{ fontSize: 12, color: "var(--text-muted)", margin: "0 0 8px" }}>Locations</p>
+              <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 16 }}>
+                {results.locations.map((l) => (
+                  <div
+                    key={l.id}
+                    onClick={() => nav({ screen: "locations" })}
+                    style={{ border: "0.5px solid var(--border)", borderRadius: "var(--radius)", padding: "8px 10px", cursor: "pointer" }}
+                  >
+                    <p style={{ fontSize: 13, margin: 0 }}>{l.name}</p>
                   </div>
                 ))}
               </div>
@@ -116,6 +138,7 @@ export default function Dashboard({ state, nav, search, setSearch }) {
         <div style={{ padding: "20px 16px 24px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
           <Tile icon="👤" label="Characters" onClick={() => nav({ screen: "characters" })} />
           <Tile icon="✏️" label="Prompt vault" onClick={() => nav({ screen: "prompts" })} />
+          <Tile icon="📍" label="Locations" onClick={() => nav({ screen: "locations" })} />
           <Tile icon="🖼️" label="Asset vault" onClick={() => nav({ screen: "vault" })} />
           <Tile icon="+" label="Create a character" dashed onClick={() => nav({ screen: "newCharacter" })} />
         </div>

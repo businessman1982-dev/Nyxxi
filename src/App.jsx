@@ -9,6 +9,7 @@ import PromptList from "./screens/PromptList.jsx";
 import NewPrompt from "./screens/NewPrompt.jsx";
 import PromptDetail from "./screens/PromptDetail.jsx";
 import AssetVault from "./screens/AssetVault.jsx";
+import LocationList from "./screens/LocationList.jsx";
 
 export default function App() {
   const [state, setState] = useState(loadState);
@@ -43,6 +44,9 @@ export default function App() {
       prompts: s.prompts.filter((p) => p.characterId !== id),
     }));
   const addPrompt = (p) => setState((s) => ({ ...s, prompts: [...s.prompts, p] }));
+  const addLocation = (l) => setState((s) => ({ ...s, locations: [...s.locations, l] }));
+  const deleteLocation = (id) =>
+    setState((s) => ({ ...s, locations: s.locations.filter((l) => l.id !== id) }));
   const deletePrompt = (id) => setState((s) => ({ ...s, prompts: s.prompts.filter((p) => p.id !== id) }));
   const generate = (prompt) =>
     setState((s) => ({
@@ -54,10 +58,11 @@ export default function App() {
   if (route.screen === "dashboard") screen = <Dashboard state={state} nav={nav} search={search} setSearch={setSearch} />;
   else if (route.screen === "characters") screen = <CharacterList state={state} nav={nav} />;
   else if (route.screen === "newCharacter") screen = <NewCharacter nav={nav} addCharacter={addCharacter} />;
-  else if (route.screen === "character") screen = <CharacterDetail key={route.id} state={state} nav={nav} route={route} updateCharacter={updateCharacter} deleteCharacter={deleteCharacter} />;
+  else if (route.screen === "character") screen = <CharacterDetail key={route.id} state={state} nav={nav} route={route} updateCharacter={updateCharacter} deleteCharacter={deleteCharacter} addPrompt={addPrompt} locations={state.locations} />;
   else if (route.screen === "prompts") screen = <PromptList state={state} nav={nav} />;
   else if (route.screen === "newPrompt") screen = <NewPrompt state={state} nav={nav} route={route} addPrompt={addPrompt} />;
   else if (route.screen === "prompt") screen = <PromptDetail state={state} nav={nav} route={route} generate={generate} deletePrompt={deletePrompt} />;
+  else if (route.screen === "locations") screen = <LocationList state={state} nav={nav} addLocation={addLocation} deleteLocation={deleteLocation} />;
   else if (route.screen === "vault") screen = <AssetVault state={state} nav={nav} />;
 
   return (
