@@ -5,6 +5,7 @@ import Button from "../components/Button.jsx";
 import TextField from "../components/TextField.jsx";
 import NotesField from "../components/NotesField.jsx";
 import { uid } from "../lib/utils.js";
+import { KINDS, groupByKind } from "../lib/wardrobe.js";
 
 export default function CharacterDetail({ state, nav, route, updateCharacter, deleteCharacter, addPrompt, locations }) {
   const character = state.characters.find((c) => c.id === route.id);
@@ -114,59 +115,97 @@ function ProfileTab({ character, updateCharacter }) {
 
 function WardrobeTab({ character, updateCharacter }) {
   const [adding, setAdding] = useState(false);
+  const [kind, setKind] = useState("outfit");
   const [note, setNote] = useState("");
   const [photo, setPhoto] = useState(null);
+
+  const selectStyle = {
+    width: "100%", marginBottom: 18, padding: "10px 12px", fontSize: 13,
+    background: "var(--fill-secondary)", color: "var(--text-primary)",
+    border: "0.5px solid var(--border-strong)", borderRadius: "var(--radius)",
+  };
 
   if (adding) {
     return (
       <div>
-        <Header title="Add outfit" onBack={() => setAdding(false)} />
+        <Header title="Add to wardrobe" onBack={() => setAdding(false)} />
         <div style={{ padding: "18px 16px" }}>
-          <TextField label="Outfit note" value={note} onChange={setNote} placeholder="e.g. Red bodysuit, stage look" />
+          <p style={{ fontSize: 12, color: "var(--text-secondary)", margin: "0 0 8px" }}>Kind</p>
+          <select value={kind} onChange={(e) => setKind(e.target.value)} style={selectStyle}>
+            {KINDS.map((k) => (
+              <option key={k.id} value={k.id}>{k.label}</option>
+            ))}
+          </select>
+          <TextField
+            label="Description"
+            value={note}
+            onChange={setNote}
+            placeholder={
+              kind === "shoes" ? "e.g. Silver ankle boots, scuffed"
+                : kind === "bag" ? "e.g. Small black crossbody"
+                : kind === "jewellery" ? "e.g. Thin gold hoops, signet ring"
+                : kind === "other" ? "e.g. Wire-frame glasses"
+                : "e.g. Black tour coat, matte"
+            }
+          />
           <p style={{ fontSize: 12, color: "var(--text-secondary)", margin: "0 0 8px" }}>Photo</p>
-          <div style={{ maxWidth: 140, margin: "0 auto 22px" }}>
+          <div style={{ maxWidth: 140, margin: "0 auto 8px" }}>
             <PhotoSlot src={photo} onAdd={setPhoto} onRemove={() => setPhoto(null)} />
           </div>
+          <p style={{ fontSize: 11, color: "var(--text-muted)", margin: "0 0 22px", textAlign: "center", lineHeight: 1.5 }}>
+            Shoot a piece on its own, or leave it in the photo of the outfit it goes with.
+          </p>
           <Button
             variant="primary"
             disabled={!note.trim() || !photo}
             onClick={() => {
               updateCharacter(character.id, {
-                wardrobe: [...(character.wardrobe || []), { id: uid(), note: note.trim(), photo }],
+                wardrobe: [...(character.wardrobe || []), { id: uid(), kind, note: note.trim(), photo }],
               });
               setAdding(false);
               setNote("");
               setPhoto(null);
             }}
           >
-            Add outfit
+            Add to wardrobe
           </Button>
         </div>
       </div>
     );
   }
 
+  const groups = groupByKind(character.wardrobe);
   const wardrobe = character.wardrobe || [];
   return (
     <div style={{ padding: 16 }}>
-      {wardrobe.length === 0 ? (
-        <p style={{ fontSize: 13, color: "var(--text-muted)", textAlign: "center", padding: "20px 0" }}>
-          No outfits yet — add your first look for {character.name}.
+      {groups.length === 0 ? (
+        <p style={{ fontSize: 13, color: "var(--text-muted)", textAlign: "center", padding: "20px 0", lineHeight: 1.6 }}>
+          Nothing in {character.name}&rsquo;s wardrobe yet — clothes, shoes, bags and
+          jewellery all live here.
         </p>
       ) : (
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 10, marginBottom: 12 }}>
-          {wardrobe.map((w) => (
-            <div key={w.id}>
-              <PhotoSlot
-                src={w.photo}
-                onRemove={() => updateCharacter(character.id, { wardrobe: wardrobe.filter((x) => x.id !== w.id) })}
-              />
-              <p style={{ fontSize: 12, fontWeight: 500, margin: "6px 0 0" }}>{w.note}</p>
+        groups.map((g) => (
+          <div key={g.id} style={{ marginBottom: 18 }}>
+            <p style={{ fontSize: 11, color: "var(--text-muted)", margin: "0 0 8px" }}>
+              {g.label} ({g.items.length})
+            </p>
+            {/* garments get room; accessories are small things and read
+                better packed tighter */}
+            <div style={{ display: "grid", gridTemplateColumns: `repeat(${g.id === "outfit" ? 2 : 3}, 1fr)`, gap: 10 }}>
+              {g.items.map((w) => (
+                <div key={w.id}>
+                  <PhotoSlot
+                    src={w.photo}
+                    onRemove={() => updateCharacter(character.id, { wardrobe: wardrobe.filter((x) => x.id !== w.id) })}
+                  />
+                  <p style={{ fontSize: g.id === "outfit" ? 12 : 11, fontWeight: 500, margin: "6px 0 0", lineHeight: 1.4 }}>{w.note}</p>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+          </div>
+        ))
       )}
-      <Button onClick={() => setAdding(true)}>+ Add outfit</Button>
+      <Button onClick={() => setAdding(true)}>+ Add to wardrobe</Button>
     </div>
   );
 }
@@ -198,16 +237,19 @@ function PromptsTab({ state, nav, character }) {
 }
 
 function ComposeTab({ character, nav, addPrompt, setTab, locations }) {
-  const wardrobe = character.wardrobe || [];
-  const [outfitId, setOutfitId] = useState("");
+  const [picked, setPicked] = useState({});
   const [locationId, setLocationId] = useState("");
   const [scene, setScene] = useState("");
   const [extra, setExtra] = useState("");
   const [copied, setCopied] = useState(false);
 
   const look = (character.look || "").trim();
-  const outfit = wardrobe.find((w) => w.id === outfitId);
+  const groups = groupByKind(character.wardrobe);
   const location = locations.find((l) => l.id === locationId);
+
+  const chosen = groups
+    .map((g) => ({ group: g, item: g.items.find((i) => i.id === picked[g.id]) }))
+    .filter((c) => c.item);
 
   // A saved location contributes its description; free text either stands in
   // for one or adds to it.
@@ -217,7 +259,7 @@ function ComposeTab({ character, nav, addPrompt, setTab, locations }) {
 
   const prompt = [
     look,
-    outfit ? `Wearing: ${outfit.note}` : "",
+    ...chosen.map((c) => `${c.group.prefix}: ${c.item.note}`),
     sceneText ? `Scene: ${sceneText}` : "",
     extra.trim(),
   ]
@@ -227,7 +269,7 @@ function ComposeTab({ character, nav, addPrompt, setTab, locations }) {
   // Photos can't live inside a text prompt, so they travel alongside it.
   const refs = [
     ...(character.sheets || []).map((src) => ({ src, label: character.name })),
-    ...(outfit?.photo ? [{ src: outfit.photo, label: outfit.note }] : []),
+    ...chosen.filter((c) => c.item.photo).map((c) => ({ src: c.item.photo, label: c.item.note })),
     ...(location?.photo ? [{ src: location.photo, label: location.name }] : []),
   ];
 
@@ -261,21 +303,30 @@ function ComposeTab({ character, nav, addPrompt, setTab, locations }) {
   return (
     <div style={{ padding: 16 }}>
       <p style={{ fontSize: 11, color: "var(--text-muted)", margin: "0 0 14px", lineHeight: 1.5 }}>
-        {character.name}&rsquo;s look stays locked. Swap the outfit and the location.
+        {character.name}&rsquo;s look stays locked. Swap what she wears and where she is.
       </p>
 
-      <p style={{ fontSize: 12, color: "var(--text-secondary)", margin: "0 0 8px" }}>Outfit</p>
-      {wardrobe.length === 0 ? (
-        <p style={{ fontSize: 12, color: "var(--text-muted)", margin: "0 0 18px" }}>
-          No outfits yet — add one in the Wardrobe tab and it will show up here.
+      {groups.length === 0 ? (
+        <p style={{ fontSize: 12, color: "var(--text-muted)", margin: "0 0 18px", lineHeight: 1.5 }}>
+          Nothing in the wardrobe yet — add clothes, shoes, bags or jewellery and they
+          will show up here.
         </p>
       ) : (
-        <select value={outfitId} onChange={(e) => setOutfitId(e.target.value)} style={selectStyle}>
-          <option value="">No outfit</option>
-          {wardrobe.map((w) => (
-            <option key={w.id} value={w.id}>{w.note}</option>
-          ))}
-        </select>
+        groups.map((g) => (
+          <div key={g.id}>
+            <p style={{ fontSize: 12, color: "var(--text-secondary)", margin: "0 0 8px" }}>{g.label}</p>
+            <select
+              value={picked[g.id] || ""}
+              onChange={(e) => setPicked({ ...picked, [g.id]: e.target.value })}
+              style={selectStyle}
+            >
+              <option value="">None</option>
+              {g.items.map((i) => (
+                <option key={i.id} value={i.id}>{i.note}</option>
+              ))}
+            </select>
+          </div>
+        ))
       )}
 
       <p style={{ fontSize: 12, color: "var(--text-secondary)", margin: "0 0 8px" }}>Location</p>

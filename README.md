@@ -19,13 +19,15 @@ The repo holds two pages:
   Kept separate from the look, because only one of the two belongs in a prompt
 - **Locations** — a reusable library of places, each with a description and an
   optional reference photo
-- **Compose** — hold the look locked, pick an outfit and a location, and get a
+- **Compose** — hold the look locked, pick one of each wardrobe kind plus a
+  location, and get a
   finished prompt to copy or save to the vault. Reference photos (character sheet,
   outfit, location) are gathered beside it to attach in your generator
 
 Nyxxi does not generate images — it is where you assemble everything a generator
 needs, so the copy-out is one click and nothing drifts between renders.
-- **Wardrobe** — attach outfit photos and notes to every character
+- **Wardrobe** — clothes, shoes, bags and jewellery, each with a photo and a note,
+  grouped by kind. Shoot a piece on its own or leave it in the outfit photo
 - **Prompt vault** — save prompts globally or per character, then generate from them
 - **Asset vault** — generation outputs are collected automatically
 - **Search** — one search box across characters, looks, bibles, wardrobe, and prompts
