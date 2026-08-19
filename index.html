@@ -2,13 +2,295 @@
 <html lang="en" data-theme="dark">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✦</text></svg>" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Nyxxi — AI Creator OS. Manage your characters, wardrobe, prompts, and generated assets in one place." />
-    <title>Nyxxi — AI Creator OS</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✦</text></svg>" />
+    <title>Nyxxi — a dark room for people who make people</title>
+    <meta name="description" content="Nyxxi is the creator OS for AI characters. Keep your cast, their wardrobe, your prompt library and every generation in one place." />
+    <meta property="og:title" content="Nyxxi — AI Creator OS" />
+    <meta property="og:description" content="A dark room for people who make people. Characters, wardrobe, prompts, output — one place." />
+    <meta property="og:type" content="website" />
+    <meta name="theme-color" content="#05050a" />
+    <link rel="preload" as="font" type="font/woff2" crossorigin href="/fonts/instrument-serif-normal-400-latin.woff2" />
+    <link rel="preload" as="font" type="font/woff2" crossorigin href="/fonts/space-grotesk-normal-300_700-latin.woff2" />
   </head>
   <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
+    <!-- ══ boot veil ══ -->
+    <div class="boot" id="boot" aria-hidden="true">
+      <div class="boot__mark">
+        <svg viewBox="0 0 48 48" class="sigil-mark" aria-hidden="true">
+          <circle cx="24" cy="24" r="21" />
+          <path d="M24 5 L27.4 20.6 L43 24 L27.4 27.4 L24 43 L20.6 27.4 L5 24 L20.6 20.6 Z" class="fill" />
+        </svg>
+      </div>
+    </div>
+
+    <!-- ══ fixed chrome ══ -->
+    <header class="chrome" id="chrome">
+      <a class="chrome__logo" href="#top" aria-label="Nyxxi — home">
+        <svg viewBox="0 0 48 48" class="sigil-mark" aria-hidden="true">
+          <circle cx="24" cy="24" r="21" />
+          <path d="M24 5 L27.4 20.6 L43 24 L27.4 27.4 L24 43 L20.6 27.4 L5 24 L20.6 20.6 Z" class="fill" />
+        </svg>
+        <span>NYXXI</span>
+      </a>
+
+      <div class="readout" id="readout" aria-hidden="true">
+        <span class="readout__num" id="readoutNum">I</span>
+        <span class="readout__name" id="readoutName">VOID</span>
+        <span class="readout__bar"><i id="readoutFill"></i></span>
+      </div>
+
+      <a class="chrome__cta" href="/app/">
+        Open Nyxxi
+        <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 13L13 3M13 3H5.5M13 3v7.5" /></svg>
+      </a>
+    </header>
+
+    <main id="top">
+      <!-- ══════════ THE FILM ══════════ -->
+      <div id="film">
+        <div class="film-stage">
+        <!-- ── I · VOID ── -->
+        <section class="ch" id="ch1" data-num="I" data-name="VOID">
+            <canvas class="embers" id="embers" aria-hidden="true"></canvas>
+            <div class="void-glow" id="voidGlow" aria-hidden="true"></div>
+            <div class="hero">
+              <p class="hero__eyebrow"><span>AI</span><i></i><span>CREATOR OS</span></p>
+              <h1 class="hero__mark" data-split>NYXXI</h1>
+              <p class="hero__sub">
+                A dark room for people who make people. Your cast, their wardrobe,
+                every sentence that ever worked, and everything you've made — one place.
+              </p>
+            </div>
+            <div class="cue" id="cue" aria-hidden="true"><span>SCROLL</span><i></i></div>
+        </section>
+
+        <!-- ── II · INVOCATION ── -->
+        <section class="ch" id="ch2" data-num="II" data-name="INVOCATION">
+            <div class="sigil" id="sigil" aria-hidden="true">
+              <svg viewBox="0 0 400 400">
+                <circle class="s-ring" cx="200" cy="200" r="150" />
+                <circle class="s-ring s-ring--in" cx="200" cy="200" r="108" />
+                <g class="s-ticks"></g>
+                <path class="s-star" d="M200 62 L214 186 L338 200 L214 214 L200 338 L186 214 L62 200 L186 186 Z" />
+              </svg>
+              <div class="sigil__core"></div>
+            </div>
+            <div class="stream" id="stream" aria-hidden="true"></div>
+            <div class="beat beat--ch2">
+              <p class="beat__kicker">II · INVOCATION</p>
+              <h2 class="beat__title">Every image<br /><em>starts as a sentence.</em></h2>
+              <p class="beat__body">
+                The prompt vault keeps them all — global or bound to one character —
+                so the sentence that worked at 2am is still there on Tuesday.
+              </p>
+            </div>
+        </section>
+
+        <!-- ── III · EMBODIMENT ── -->
+        <section class="ch" id="ch3" data-num="III" data-name="EMBODIMENT">
+            <div class="plates" id="plates" aria-hidden="true">
+              <article class="plate plate--b">
+                <div class="plate__art plate__art--b"></div>
+                <div class="plate__meta"><span>CHARACTER 03</span><span>RHEA</span></div>
+              </article>
+              <article class="plate plate--c">
+                <div class="plate__art plate__art--c"></div>
+                <div class="plate__meta"><span>CHARACTER 02</span><span>IZUMI</span></div>
+              </article>
+              <article class="plate plate--a" id="plateA">
+                <div class="plate__art plate__art--a">
+                  <div class="plate__scan" id="plateScan"></div>
+                  <div class="plate__noise"></div>
+                </div>
+                <div class="plate__meta"><span>CHARACTER 01</span><span>SELENE</span></div>
+                <ul class="plate__attrs">
+                  <li><span>REF SHEETS</span><b>2 / 2</b></li>
+                  <li><span>WARDROBE</span><b>14</b></li>
+                  <li><span>PROMPTS</span><b>31</b></li>
+                </ul>
+              </article>
+            </div>
+            <div class="beat beat--ch3">
+              <p class="beat__kicker">III · EMBODIMENT</p>
+              <h2 class="beat__title">A character is<br /><em>more than a face.</em></h2>
+              <p class="beat__body">
+                Two reference sheets, a name, and every note you've ever taken about
+                who they are — held together so the next render remembers.
+              </p>
+            </div>
+        </section>
+
+        <!-- ── IV · WARDROBE ── -->
+        <section class="ch ch--wide" id="ch4" data-num="IV" data-name="WARDROBE">
+            <h2 class="ghost" id="wardrobeGhost" aria-hidden="true">WARDROBE</h2>
+            <div class="rack" id="rack">
+              <div class="rack__track" id="rackTrack">
+                <div class="rack__lead">
+                  <p class="beat__kicker">IV · WARDROBE</p>
+                  <h3 class="rack__title">Outfits that<br /><em>stay on file.</em></h3>
+                  <p class="beat__body">
+                    Every look gets a photo and a note. Pull the rack sideways —
+                    it's all still attached to her.
+                  </p>
+                </div>
+                <article class="fit" data-fit="01"><div class="fit__art fit--1"></div><div class="fit__label"><b>MIDNIGHT SILK</b><span>full-length, cold key light</span></div></article>
+                <article class="fit" data-fit="02"><div class="fit__art fit--2"></div><div class="fit__label"><b>COMBAT / MATTE</b><span>black plate, hard shadow</span></div></article>
+                <article class="fit" data-fit="03"><div class="fit__art fit--3"></div><div class="fit__label"><b>EMBER COAT</b><span>backlit, warm rim</span></div></article>
+                <article class="fit" data-fit="04"><div class="fit__art fit--4"></div><div class="fit__label"><b>GLASS ARMOUR</b><span>refraction pass</span></div></article>
+                <article class="fit" data-fit="05"><div class="fit__art fit--5"></div><div class="fit__label"><b>ASH LINEN</b><span>daylight, flat grade</span></div></article>
+                <article class="fit" data-fit="06"><div class="fit__art fit--6"></div><div class="fit__label"><b>VIOLET STATIC</b><span>neon practicals</span></div></article>
+                <article class="fit" data-fit="07"><div class="fit__art fit--7"></div><div class="fit__label"><b>PAPER CROWN</b><span>overhead, bounced fill</span></div></article>
+                <article class="fit" data-fit="08"><div class="fit__art fit--8"></div><div class="fit__label"><b>NIGHT SWIM</b><span>caustics, single source</span></div></article>
+              </div>
+            </div>
+        </section>
+
+        <!-- ── V · THE VAULT ── -->
+        <section class="ch" id="ch5" data-num="V" data-name="THE VAULT">
+            <div class="vault" id="vault" aria-hidden="true">
+              <div class="vault__grid" id="vaultGrid"></div>
+            </div>
+            <div class="beat beat--ch5">
+              <p class="beat__kicker">V · THE VAULT</p>
+              <h2 class="beat__title">Everything you've<br /><em>ever made.</em></h2>
+            </div>
+            <div class="bloom" id="bloom" aria-hidden="true"></div>
+            <div class="bloom-flat" id="bloomFlat" aria-hidden="true"></div>
+        </section>
+        </div>
+      </div>
+
+      <!-- ══════════ AFTER THE FILM ══════════ -->
+      <section class="lit" id="lit">
+        <div class="manifesto">
+          <p class="tag">THE POINT</p>
+          <p class="manifesto__line" data-reveal>You don't have a file problem.</p>
+          <p class="manifesto__line" data-reveal>You have a <em>continuity</em> problem.</p>
+          <p class="manifesto__line manifesto__line--sm" data-reveal>
+            A character you nailed last month is now a folder of screenshots, a prompt
+            in a note app, and a face you can't quite get back. Nyxxi keeps the whole
+            identity together — sheets, wardrobe, prompts, output — so the next render
+            picks up where the last one stopped.
+          </p>
+        </div>
+
+        <div class="rows">
+          <article class="row" data-reveal>
+            <div class="row__copy">
+              <p class="row__idx">01</p>
+              <h3>Characters</h3>
+              <p>
+                Up to two reference sheets each, a name, and the notes that actually
+                matter. Open a character and the whole world you built around them
+                opens with it.
+              </p>
+            </div>
+            <div class="row__vis vis-chars" aria-hidden="true">
+              <span class="vc"><i></i><b>SELENE</b></span>
+              <span class="vc"><i></i><b>IZUMI</b></span>
+              <span class="vc"><i></i><b>RHEA</b></span>
+              <span class="vc vc--ghost"><i></i><b>+ NEW</b></span>
+            </div>
+          </article>
+
+          <article class="row row--flip" data-reveal>
+            <div class="row__copy">
+              <p class="row__idx">02</p>
+              <h3>Wardrobe</h3>
+              <p>
+                Outfit photos and notes attached to the character they belong to.
+                No more guessing which coat you used in the shot you liked.
+              </p>
+            </div>
+            <div class="row__vis vis-fits" aria-hidden="true">
+              <span class="vf vf--1"></span><span class="vf vf--2"></span>
+              <span class="vf vf--3"></span><span class="vf vf--4"></span>
+            </div>
+          </article>
+
+          <article class="row" data-reveal>
+            <div class="row__copy">
+              <p class="row__idx">03</p>
+              <h3>Prompt vault</h3>
+              <p>
+                Save a prompt globally or bind it to one character. Fire it when you
+                need it. The sentence that worked is never more than one search away.
+              </p>
+            </div>
+            <div class="row__vis vis-prompt" aria-hidden="true">
+              <code>portrait of {character}, cold key light,<br />35mm, shallow depth, matte black plate</code>
+              <p class="vis-prompt__sub">
+                saved <b>31</b> prompts · bound to <b>SELENE</b><br />
+                last fired 2 days ago · 4 outputs in the vault
+              </p>
+              <span class="vis-prompt__row"><i>GLOBAL</i><i>SELENE</i><i>PORTRAIT</i></span>
+            </div>
+          </article>
+
+          <article class="row row--flip" data-reveal>
+            <div class="row__copy">
+              <p class="row__idx">04</p>
+              <h3>Asset vault</h3>
+              <p>
+                Generations land in the vault on their own, tied back to the prompt and
+                the character that made them. Nothing to file, nothing to lose.
+              </p>
+            </div>
+            <div class="row__vis vis-vault" aria-hidden="true"></div>
+          </article>
+        </div>
+
+        <div class="facts">
+          <div class="fact"><b data-count="0" data-suffix="">0</b><span>accounts needed</span></div>
+          <div class="fact"><b data-count="2" data-suffix="">0</b><span>reference sheets per character</span></div>
+          <div class="fact"><b data-count="100" data-suffix="%">0</b><span>stored on your own machine</span></div>
+        </div>
+
+        <div class="marquee" aria-hidden="true">
+          <div class="marquee__row" id="marqueeRow">
+            <span>CHARACTERS ✦ WARDROBE ✦ PROMPT VAULT ✦ ASSET VAULT ✦ ONE SEARCH BOX ✦&nbsp;</span>
+            <span>CHARACTERS ✦ WARDROBE ✦ PROMPT VAULT ✦ ASSET VAULT ✦ ONE SEARCH BOX ✦&nbsp;</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══ back to the dark ══ -->
+      <section class="close">
+        <div class="steps">
+          <div class="step" data-reveal><b>I</b><h4>Cast them</h4><p>Create a character, drop in two reference sheets.</p></div>
+          <div class="step" data-reveal><b>II</b><h4>Dress them</h4><p>Attach outfits, photos, and the notes that go with each look.</p></div>
+          <div class="step" data-reveal><b>III</b><h4>Summon</h4><p>Fire a saved prompt. The output files itself in the vault.</p></div>
+        </div>
+
+        <div class="cta">
+          <h2 data-split-lines>Open the dark room.</h2>
+          <p>No account. Nothing leaves your browser. Takes about nine seconds.</p>
+          <a class="btn" href="/app/">
+            Open Nyxxi
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3 13L13 3M13 3H5.5M13 3v7.5" /></svg>
+          </a>
+        </div>
+      </section>
+
+      <footer class="foot">
+        <div class="foot__brand">
+          <svg viewBox="0 0 48 48" class="sigil-mark" aria-hidden="true">
+            <circle cx="24" cy="24" r="21" />
+            <path d="M24 5 L27.4 20.6 L43 24 L27.4 27.4 L24 43 L20.6 27.4 L5 24 L20.6 20.6 Z" class="fill" />
+          </svg>
+          <span>NYXXI</span>
+          <p>AI Creator OS</p>
+        </div>
+        <nav class="foot__nav" aria-label="Product">
+          <a href="/app/">Characters</a><a href="/app/">Wardrobe</a>
+          <a href="/app/">Prompts</a><a href="/app/">Asset vault</a>
+        </nav>
+        <div class="foot__social" id="social"></div>
+        <p class="foot__legal">Local-first. No account, no upload, no telemetry.</p>
+      </footer>
+    </main>
+
+    <script type="module" src="/src/landing/main.js"></script>
   </body>
 </html>
