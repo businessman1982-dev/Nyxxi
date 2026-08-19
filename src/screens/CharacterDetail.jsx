@@ -5,7 +5,7 @@ import Button from "../components/Button.jsx";
 import TextField from "../components/TextField.jsx";
 import NotesField from "../components/NotesField.jsx";
 import { uid } from "../lib/utils.js";
-import { KINDS, groupByKind } from "../lib/wardrobe.js";
+import { KINDS, groupByKind, isHairLine } from "../lib/wardrobe.js";
 
 export default function CharacterDetail({ state, nav, route, updateCharacter, deleteCharacter, addPrompt, locations }) {
   const character = state.characters.find((c) => c.id === route.id);
@@ -141,7 +141,8 @@ function WardrobeTab({ character, updateCharacter }) {
             value={note}
             onChange={setNote}
             placeholder={
-              kind === "shoes" ? "e.g. Silver ankle boots, scuffed"
+              kind === "hair" ? "e.g. Platinum bob wig, blunt fringe"
+                : kind === "shoes" ? "e.g. Silver ankle boots, scuffed"
                 : kind === "bag" ? "e.g. Small black crossbody"
                 : kind === "jewellery" ? "e.g. Thin gold hoops, signet ring"
                 : kind === "other" ? "e.g. Wire-frame glasses"
@@ -153,7 +154,9 @@ function WardrobeTab({ character, updateCharacter }) {
             <PhotoSlot src={photo} onAdd={setPhoto} onRemove={() => setPhoto(null)} />
           </div>
           <p style={{ fontSize: 11, color: "var(--text-muted)", margin: "0 0 22px", textAlign: "center", lineHeight: 1.5 }}>
-            Shoot a piece on its own, or leave it in the photo of the outfit it goes with.
+            {kind === "hair"
+              ? "A wig, a piece, or just a different style — anything that changes the hair."
+              : "Shoot a piece on its own, or leave it in the photo of the outfit it goes with."}
           </p>
           <Button
             variant="primary"
@@ -249,7 +252,16 @@ function ComposeTab({ character, nav, addPrompt, setTab, locations }) {
 
   const chosen = groups
     .map((g) => ({ group: g, item: g.items.find((i) => i.id === picked[g.id]) }))
-    .filter((c) => c.item);
+    .filter((c) => c.item)
+    .sort((a, b) => a.group.rank - b.group.rank);
+
+  // A look usually pins the hair. Picking a hair piece for this shot would
+  // otherwise leave the prompt saying two different things, so the piece wins
+  // and the look's hair line steps aside.
+  const hairPicked = chosen.some((c) => c.group.id === "hair");
+  const lookLines = look.split("\n");
+  const hairOverridden = hairPicked && lookLines.some(isHairLine);
+  const lookText = (hairPicked ? lookLines.filter((l) => !isHairLine(l)) : lookLines).join("\n");
 
   // A saved location contributes its description; free text either stands in
   // for one or adds to it.
@@ -258,7 +270,7 @@ function ComposeTab({ character, nav, addPrompt, setTab, locations }) {
     .join(", ");
 
   const prompt = [
-    look,
+    lookText,
     ...chosen.map((c) => `${c.group.prefix}: ${c.item.note}`),
     sceneText ? `Scene: ${sceneText}` : "",
     extra.trim(),
@@ -318,13 +330,18 @@ function ComposeTab({ character, nav, addPrompt, setTab, locations }) {
             <select
               value={picked[g.id] || ""}
               onChange={(e) => setPicked({ ...picked, [g.id]: e.target.value })}
-              style={selectStyle}
+              style={{ ...selectStyle, marginBottom: g.id === "hair" && hairOverridden ? 6 : 18 }}
             >
               <option value="">None</option>
               {g.items.map((i) => (
                 <option key={i.id} value={i.id}>{i.note}</option>
               ))}
             </select>
+            {g.id === "hair" && hairOverridden && (
+              <p style={{ fontSize: 11, color: "var(--text-muted)", margin: "0 0 18px", lineHeight: 1.5 }}>
+                Using this instead of the hair in {character.name}&rsquo;s look.
+              </p>
+            )}
           </div>
         ))
       )}

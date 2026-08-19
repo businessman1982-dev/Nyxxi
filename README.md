@@ -26,8 +26,10 @@ The repo holds two pages:
 
 Nyxxi does not generate images — it is where you assemble everything a generator
 needs, so the copy-out is one click and nothing drifts between renders.
-- **Wardrobe** — clothes, shoes, bags and jewellery, each with a photo and a note,
-  grouped by kind. Shoot a piece on its own or leave it in the outfit photo
+- **Wardrobe** — clothes, hair, shoes, bags and jewellery, each with a photo and a
+  note, grouped by kind. Shoot a piece on its own or leave it in the outfit photo.
+  A hair piece picked in Compose replaces the hair line in the character's look, so
+  the prompt never says two different things about it
 - **Prompt vault** — save prompts globally or per character, then generate from them
 - **Asset vault** — generation outputs are collected automatically
 - **Search** — one search box across characters, looks, bibles, wardrobe, and prompts

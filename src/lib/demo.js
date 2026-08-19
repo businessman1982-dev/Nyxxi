@@ -53,6 +53,7 @@ export function buildDemo() {
           { id: uid(), kind: "outfit", note: "Black tour coat, matte", photo: swatch("#2b2b36", "#0b0b11", 200) },
           { id: uid(), kind: "outfit", note: "Midnight silk, full length", photo: swatch("#3d3470", "#0d0b1c", 210) },
           { id: uid(), kind: "outfit", note: "Ash linen, daylight", photo: swatch("#4a4437", "#16140f", 190) },
+          { id: uid(), kind: "hair", note: "Platinum bob wig, blunt fringe", photo: swatch("#e8e4d8", "#3a3730", 175) },
           { id: uid(), kind: "shoes", note: "Silver ankle boots, scuffed", photo: swatch("#9a9aa8", "#26262e", 170) },
           { id: uid(), kind: "bag", note: "Small black crossbody", photo: swatch("#33323c", "#0e0e12", 220) },
           { id: uid(), kind: "jewellery", note: "Thin gold hoops, signet ring", photo: swatch("#c9a24f", "#2b2113", 180) },
