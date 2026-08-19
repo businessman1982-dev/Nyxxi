@@ -2,7 +2,7 @@ import Avatar from "../components/Avatar.jsx";
 import Button from "../components/Button.jsx";
 import Tile from "../components/Tile.jsx";
 
-export default function Dashboard({ state, nav, search, setSearch }) {
+export default function Dashboard({ state, nav, search, setSearch, loadDemo }) {
   const hasCharacters = state.characters.length > 0;
   const results = search.trim()
     ? {
@@ -129,6 +129,15 @@ export default function Dashboard({ state, nav, search, setSearch }) {
           <Button variant="primary" style={{ width: "auto", padding: "11px 22px" }} onClick={() => nav({ screen: "newCharacter" })}>
             + Create character
           </Button>
+          <p
+            onClick={loadDemo}
+            style={{ fontSize: 12, color: "var(--text-accent)", cursor: "pointer", margin: "16px 0 0" }}
+          >
+            Or load a demo character
+          </p>
+          <p style={{ fontSize: 11, color: "var(--text-muted)", margin: "6px 0 0", lineHeight: 1.5 }}>
+            A worked example with a look, a wardrobe and locations. Delete it whenever.
+          </p>
           <div style={{ display: "flex", gap: 16, justifyContent: "center", marginTop: 24 }}>
             <span onClick={() => nav({ screen: "prompts" })} style={{ fontSize: 11, color: "var(--text-muted)", cursor: "pointer" }}>Prompt vault</span>
             <span onClick={() => nav({ screen: "vault" })} style={{ fontSize: 11, color: "var(--text-muted)", cursor: "pointer" }}>Asset vault</span>

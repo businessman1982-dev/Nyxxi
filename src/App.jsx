@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { loadState, saveState, loadTheme, saveTheme } from "./lib/storage.js";
 import { uid } from "./lib/utils.js";
+import { buildDemo } from "./lib/demo.js";
 import Dashboard from "./screens/Dashboard.jsx";
 import CharacterList from "./screens/CharacterList.jsx";
 import NewCharacter from "./screens/NewCharacter.jsx";
@@ -44,6 +45,16 @@ export default function App() {
       prompts: s.prompts.filter((p) => p.characterId !== id),
     }));
   const addPrompt = (p) => setState((s) => ({ ...s, prompts: [...s.prompts, p] }));
+  const loadDemo = () => {
+    const demo = buildDemo();
+    setState((s) => ({
+      ...s,
+      characters: [...s.characters, ...demo.characters],
+      locations: [...s.locations, ...demo.locations],
+      prompts: [...s.prompts, ...demo.prompts],
+    }));
+    nav({ screen: "character", id: demo.characterId });
+  };
   const addLocation = (l) => setState((s) => ({ ...s, locations: [...s.locations, l] }));
   const deleteLocation = (id) =>
     setState((s) => ({ ...s, locations: s.locations.filter((l) => l.id !== id) }));
@@ -55,7 +66,7 @@ export default function App() {
     }));
 
   let screen;
-  if (route.screen === "dashboard") screen = <Dashboard state={state} nav={nav} search={search} setSearch={setSearch} />;
+  if (route.screen === "dashboard") screen = <Dashboard state={state} nav={nav} search={search} setSearch={setSearch} loadDemo={loadDemo} />;
   else if (route.screen === "characters") screen = <CharacterList state={state} nav={nav} />;
   else if (route.screen === "newCharacter") screen = <NewCharacter nav={nav} addCharacter={addCharacter} />;
   else if (route.screen === "character") screen = <CharacterDetail key={route.id} state={state} nav={nav} route={route} updateCharacter={updateCharacter} deleteCharacter={deleteCharacter} addPrompt={addPrompt} locations={state.locations} />;
