@@ -8,6 +8,7 @@ import { uid } from "../lib/utils.js";
 export default function NewCharacter({ nav, addCharacter }) {
   const [name, setName] = useState("");
   const [sheets, setSheets] = useState([]);
+  const [bible, setBible] = useState("");
 
   return (
     <div>
@@ -25,12 +26,21 @@ export default function NewCharacter({ nav, addCharacter }) {
           )}
         </div>
 
+        <TextField
+          label="Character bible (optional — you can write this later)"
+          area
+          rows={5}
+          value={bible}
+          onChange={setBible}
+          placeholder="What has to stay true every time you render them: look, lighting, the things that keep coming out wrong."
+        />
+
         <Button
           variant="primary"
           disabled={!name.trim() || sheets.length === 0}
           onClick={() => {
             const id = uid();
-            addCharacter({ id, name: name.trim(), sheets, wardrobe: [] });
+            addCharacter({ id, name: name.trim(), sheets, bible: bible.trim(), wardrobe: [] });
             nav({ screen: "character", id });
           }}
         >

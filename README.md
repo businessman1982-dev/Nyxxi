@@ -13,10 +13,13 @@ The repo holds two pages:
 ## The app
 
 - **Characters** — create characters with up to two reference sheets each
+- **Character bible** — free-form notes per character describing everything that has
+  to stay consistent between renders (look, lighting, what to never generate).
+  Autosaves, counts words, and copies to the clipboard for pasting into a generator
 - **Wardrobe** — attach outfit photos and notes to every character
 - **Prompt vault** — save prompts globally or per character, then generate from them
 - **Asset vault** — generation outputs are collected automatically
-- **Search** — one search box across characters, wardrobe, and prompts
+- **Search** — one search box across characters, bibles, wardrobe, and prompts
 - **Light / dark theme** — follows your system preference, with a manual toggle
 - Everything is stored locally in your browser (`localStorage`) — no account needed
 

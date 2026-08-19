@@ -382,7 +382,8 @@ p { margin: 0; }
   .beat--ch2 { max-width: 1400px; padding-left: clamp(40px, 8vw, 140px); }
   .beat--ch2 > * { max-width: 30ch; }
   .beat--ch3 { display: flex; flex-direction: column; align-items: flex-end; text-align: right; }
-  .beat--ch3 .beat__body { text-align: right; }
+  /* narrower than the other beats so it clears the fanned plates */
+  .beat--ch3 .beat__body { text-align: right; max-width: 31ch; }
 }
 
 /* ── III · EMBODIMENT ─────────────────────────────────────────── */

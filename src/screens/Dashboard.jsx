@@ -6,7 +6,11 @@ export default function Dashboard({ state, nav, search, setSearch }) {
   const hasCharacters = state.characters.length > 0;
   const results = search.trim()
     ? {
-        characters: state.characters.filter((c) => c.name.toLowerCase().includes(search.toLowerCase())),
+        characters: state.characters.filter(
+          (c) =>
+            c.name.toLowerCase().includes(search.toLowerCase()) ||
+            (c.bible || "").toLowerCase().includes(search.toLowerCase())
+        ),
         prompts: state.prompts.filter((p) => p.text.toLowerCase().includes(search.toLowerCase())),
         wardrobe: state.characters.flatMap((c) =>
           (c.wardrobe || [])
@@ -22,7 +26,7 @@ export default function Dashboard({ state, nav, search, setSearch }) {
         <p style={{ fontSize: 17, fontWeight: 500, margin: "0 0 14px" }}>Dashboard</p>
         <input
           type="text"
-          placeholder="Search characters, wardrobe, prompts..."
+          placeholder="Search characters, bibles, wardrobe, prompts..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           style={{ width: "100%" }}

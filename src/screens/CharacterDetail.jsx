@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Header from "../components/Header.jsx";
 import PhotoSlot from "../components/PhotoSlot.jsx";
 import Button from "../components/Button.jsx";
@@ -47,17 +47,7 @@ export default function CharacterDetail({ state, nav, route, updateCharacter, de
       </div>
 
       {tab === "profile" && (
-        <div style={{ padding: 16 }}>
-          <p style={{ fontSize: 11, color: "var(--text-muted)", margin: "0 0 8px" }}>Character sheets ({character.sheets.length}/2)</p>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 10 }}>
-            {character.sheets.map((s, i) => (
-              <PhotoSlot key={i} src={s} onRemove={() => updateCharacter(character.id, { sheets: character.sheets.filter((_, j) => j !== i) })} />
-            ))}
-            {character.sheets.length < 2 && (
-              <PhotoSlot onAdd={(url) => updateCharacter(character.id, { sheets: [...character.sheets, url] })} />
-            )}
-          </div>
-        </div>
+        <ProfileTab character={character} updateCharacter={updateCharacter} />
       )}
 
       {tab === "wardrobe" && (
@@ -67,6 +57,97 @@ export default function CharacterDetail({ state, nav, route, updateCharacter, de
       {tab === "prompts" && (
         <PromptsTab state={state} nav={nav} character={character} />
       )}
+    </div>
+  );
+}
+
+function ProfileTab({ character, updateCharacter }) {
+  const [bible, setBible] = useState(character.bible || "");
+  const [saved, setSaved] = useState(true);
+  const [copied, setCopied] = useState(false);
+  const latest = useRef(bible);
+  const committed = useRef(character.bible || "");
+  latest.current = bible;
+
+  // Debounced: every keystroke would otherwise rewrite the whole store,
+  // and photos are data URLs, so that write is not cheap.
+  useEffect(() => {
+    if (bible === committed.current) {
+      setSaved(true);
+      return;
+    }
+    setSaved(false);
+    const t = setTimeout(() => {
+      updateCharacter(character.id, { bible });
+      committed.current = bible;
+      setSaved(true);
+    }, 500);
+    return () => clearTimeout(t);
+  }, [bible, character.id, updateCharacter]);
+
+  // Leaving the tab mid-sentence must not lose the last few keystrokes.
+  useEffect(
+    () => () => {
+      if (latest.current !== committed.current) {
+        updateCharacter(character.id, { bible: latest.current });
+      }
+    },
+    [character.id, updateCharacter]
+  );
+
+  const words = bible.trim() ? bible.trim().split(/\s+/).length : 0;
+
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(bible);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      setCopied(false);
+    }
+  };
+
+  return (
+    <div style={{ padding: 16 }}>
+      <p style={{ fontSize: 11, color: "var(--text-muted)", margin: "0 0 8px" }}>Character sheets ({character.sheets.length}/2)</p>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 10, marginBottom: 22 }}>
+        {character.sheets.map((s, i) => (
+          <PhotoSlot key={i} src={s} onRemove={() => updateCharacter(character.id, { sheets: character.sheets.filter((_, j) => j !== i) })} />
+        ))}
+        {character.sheets.length < 2 && (
+          <PhotoSlot onAdd={(url) => updateCharacter(character.id, { sheets: [...character.sheets, url] })} />
+        )}
+      </div>
+
+      <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 8 }}>
+        <p style={{ fontSize: 11, color: "var(--text-muted)", margin: 0, flex: 1 }}>
+          Character bible{words > 0 ? ` · ${words} word${words === 1 ? "" : "s"}` : ""}
+        </p>
+        <span style={{ fontSize: 11, color: saved ? "var(--text-muted)" : "var(--text-accent)" }}>
+          {saved ? "Saved" : "Saving…"}
+        </span>
+      </div>
+      <textarea
+        rows={10}
+        value={bible}
+        onChange={(e) => setBible(e.target.value)}
+        placeholder={
+          "Everything that has to stay true about " +
+          character.name +
+          " from one render to the next.\n\n" +
+          "Look — age, build, hair, eyes, skin, distinguishing marks\n" +
+          "Never — the things that keep coming out wrong\n" +
+          "Lighting and lens you keep coming back to\n" +
+          "Who they are — the bits that change how they stand and look at camera"
+        }
+        style={{ width: "100%", fontSize: 13, lineHeight: 1.6, padding: 10, resize: "vertical" }}
+      />
+      <p style={{ fontSize: 11, color: "var(--text-muted)", margin: "8px 0 12px", lineHeight: 1.5 }}>
+        Paste this into any generator alongside your prompt to keep {character.name} consistent.
+      </p>
+      <Button onClick={copy} disabled={!bible.trim()}>
+        {copied ? "Copied" : "Copy bible"}
+      </Button>
     </div>
   );
 }
