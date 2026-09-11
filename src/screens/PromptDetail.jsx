@@ -3,7 +3,7 @@ import Header from "../components/Header.jsx";
 import Avatar from "../components/Avatar.jsx";
 import Button from "../components/Button.jsx";
 
-export default function PromptDetail({ state, nav, route, generate, deletePrompt }) {
+export default function PromptDetail({ state, nav, route, generate, deletePrompt, limits, gate }) {
   const prompt = state.prompts.find((p) => p.id === route.id);
   const [generating, setGenerating] = useState(false);
   if (!prompt) return null;
@@ -43,6 +43,7 @@ export default function PromptDetail({ state, nav, route, generate, deletePrompt
           variant="primary"
           disabled={generating}
           onClick={() => {
+            if (limits.assets.exceeded) return gate("assets");
             setGenerating(true);
             setTimeout(() => {
               generate(prompt);

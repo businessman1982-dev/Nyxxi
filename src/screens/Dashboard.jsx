@@ -1,9 +1,12 @@
 import Avatar from "../components/Avatar.jsx";
 import Button from "../components/Button.jsx";
 import Tile from "../components/Tile.jsx";
+import UpgradeBanner from "../components/UpgradeBanner.jsx";
 
-export default function Dashboard({ state, nav, search, setSearch }) {
+export default function Dashboard({ state, nav, search, setSearch, limits, gate }) {
   const hasCharacters = state.characters.length > 0;
+  const newCharacter = () =>
+    limits.characters.exceeded ? gate("characters") : nav({ screen: "newCharacter" });
   const results = search.trim()
     ? {
         characters: state.characters.filter((c) => c.name.toLowerCase().includes(search.toLowerCase())),
@@ -100,7 +103,7 @@ export default function Dashboard({ state, nav, search, setSearch }) {
           <p style={{ fontSize: 13, color: "var(--text-secondary)", margin: "0 0 20px", lineHeight: 1.6 }}>
             Characters are where everything starts — wardrobe, prompts, and generations all build from here.
           </p>
-          <Button variant="primary" style={{ width: "auto", padding: "11px 22px" }} onClick={() => nav({ screen: "newCharacter" })}>
+          <Button variant="primary" style={{ width: "auto", padding: "11px 22px" }} onClick={newCharacter}>
             + Create character
           </Button>
           <div style={{ display: "flex", gap: 16, justifyContent: "center", marginTop: 24 }}>
@@ -109,11 +112,14 @@ export default function Dashboard({ state, nav, search, setSearch }) {
           </div>
         </div>
       ) : (
-        <div style={{ padding: "20px 16px 24px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+        <div style={{ padding: "20px 0 24px" }}>
+          <UpgradeBanner limits={limits} onUpgrade={gate} />
+          <div style={{ padding: "0 16px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
           <Tile icon="👤" label="Characters" onClick={() => nav({ screen: "characters" })} />
           <Tile icon="✏️" label="Prompt vault" onClick={() => nav({ screen: "prompts" })} />
           <Tile icon="🖼️" label="Asset vault" onClick={() => nav({ screen: "vault" })} />
-          <Tile icon="+" label="Create a character" dashed onClick={() => nav({ screen: "newCharacter" })} />
+          <Tile icon="+" label="Create a character" dashed onClick={newCharacter} />
+          </div>
         </div>
       )}
     </div>

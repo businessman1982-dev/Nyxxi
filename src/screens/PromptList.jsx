@@ -2,7 +2,7 @@ import Header from "../components/Header.jsx";
 import Avatar from "../components/Avatar.jsx";
 import Button from "../components/Button.jsx";
 
-export default function PromptList({ state, nav }) {
+export default function PromptList({ state, nav, limits, gate }) {
   return (
     <div>
       <Header title="Prompt vault" onBack={() => nav({ screen: "dashboard" })} />
@@ -30,7 +30,9 @@ export default function PromptList({ state, nav }) {
             );
           })}
         </div>
-        <Button onClick={() => nav({ screen: "newPrompt" })}>+ New prompt</Button>
+        <Button onClick={() => (limits.prompts.exceeded ? gate("prompts") : nav({ screen: "newPrompt" }))}>
+          {limits.prompts.exceeded ? "Upgrade for more prompts" : "+ New prompt"}
+        </Button>
       </div>
     </div>
   );

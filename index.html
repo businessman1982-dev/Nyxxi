@@ -1,11 +1,37 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>✦</text></svg>" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Nyxxi — AI Creator OS. Manage your characters, wardrobe, prompts, and generated assets in one place." />
-    <title>Nyxxi — AI Creator OS</title>
+    <meta name="color-scheme" content="dark light" />
+    <title>Nyxxi — every character, every outfit, every prompt in one place</title>
+    <meta
+      name="description"
+      content="Nyxxi is the home base for AI content creators. Keep your characters and their reference sheets, their wardrobe, and the prompts that actually worked — organised, searchable, and ready the next time you generate."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Nyxxi — AI Creator OS" />
+    <meta
+      property="og:description"
+      content="Characters, wardrobe, prompts and generated assets in one searchable workspace. Free plan, no account needed."
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <script>
+      // Resolve the theme before first paint — the colour tokens only exist under
+      // [data-theme], so without this the page renders untokenised until React mounts.
+      (function () {
+        try {
+          var t = localStorage.getItem("nyxxi-theme");
+          if (t !== "light" && t !== "dark") {
+            t = window.matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark";
+          }
+          document.documentElement.dataset.theme = t;
+        } catch (e) {
+          document.documentElement.dataset.theme = "dark";
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

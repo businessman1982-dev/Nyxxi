@@ -5,7 +5,7 @@ import Button from "../components/Button.jsx";
 import TextField from "../components/TextField.jsx";
 import { uid } from "../lib/utils.js";
 
-export default function CharacterDetail({ state, nav, route, updateCharacter, deleteCharacter }) {
+export default function CharacterDetail({ state, nav, route, updateCharacter, deleteCharacter, limits, gate }) {
   const character = state.characters.find((c) => c.id === route.id);
   const [tab, setTab] = useState(route.tab || "profile");
   if (!character) return null;
@@ -48,12 +48,14 @@ export default function CharacterDetail({ state, nav, route, updateCharacter, de
 
       {tab === "profile" && (
         <div style={{ padding: 16 }}>
-          <p style={{ fontSize: 11, color: "var(--text-muted)", margin: "0 0 8px" }}>Character sheets ({character.sheets.length}/2)</p>
+          <p style={{ fontSize: 11, color: "var(--text-muted)", margin: "0 0 8px" }}>
+            Character sheets ({character.sheets.length}/{limits.sheets})
+          </p>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 10 }}>
             {character.sheets.map((s, i) => (
               <PhotoSlot key={i} src={s} onRemove={() => updateCharacter(character.id, { sheets: character.sheets.filter((_, j) => j !== i) })} />
             ))}
-            {character.sheets.length < 2 && (
+            {character.sheets.length < limits.sheets && (
               <PhotoSlot onAdd={(url) => updateCharacter(character.id, { sheets: [...character.sheets, url] })} />
             )}
           </div>
@@ -65,7 +67,7 @@ export default function CharacterDetail({ state, nav, route, updateCharacter, de
       )}
 
       {tab === "prompts" && (
-        <PromptsTab state={state} nav={nav} character={character} />
+        <PromptsTab state={state} nav={nav} character={character} limits={limits} gate={gate} />
       )}
     </div>
   );
@@ -130,7 +132,7 @@ function WardrobeTab({ character, updateCharacter }) {
   );
 }
 
-function PromptsTab({ state, nav, character }) {
+function PromptsTab({ state, nav, character, limits, gate }) {
   const prompts = state.prompts.filter((p) => p.characterId === character.id);
   return (
     <div style={{ padding: 16 }}>
@@ -151,7 +153,15 @@ function PromptsTab({ state, nav, character }) {
           ))}
         </div>
       )}
-      <Button onClick={() => nav({ screen: "newPrompt", characterId: character.id })}>+ New prompt</Button>
+      <Button
+        onClick={() =>
+          limits.prompts.exceeded
+            ? gate("prompts")
+            : nav({ screen: "newPrompt", characterId: character.id })
+        }
+      >
+        {limits.prompts.exceeded ? "Upgrade for more prompts" : "+ New prompt"}
+      </Button>
     </div>
   );
 }
