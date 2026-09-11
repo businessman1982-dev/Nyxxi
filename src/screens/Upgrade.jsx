@@ -100,14 +100,14 @@ export default function Upgrade({ nav, route, onExitToSite }) {
             variant="primary"
             onClick={() => {
               track("cta_click", { location: "in_app", plan: plan.id, cycle, checkout: "unconfigured" });
-              onExitToSite("#pricing");
+              onExitToSite("#rates");
             }}
           >
             ✦ Upgrade to Studio
           </Button>
         )}
 
-        <Button variant="ghost" style={{ marginTop: 8 }} onClick={() => onExitToSite("#pricing")}>
+        <Button variant="ghost" style={{ marginTop: 8 }} onClick={() => onExitToSite("#rates")}>
           Compare all plans
         </Button>
       </div>

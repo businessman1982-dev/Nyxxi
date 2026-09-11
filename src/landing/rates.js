@@ -50,6 +50,10 @@ function rateCard(plan, cycle) {
     </div>`;
 }
 
+/* Which plan sent the visitor to the list, so a Studio lead is distinguishable
+   from a generic signup. Null when they found the form on their own. */
+let intent = null;
+
 export function initRates() {
   const grid = document.getElementById("ratesGrid");
   const toggle = document.querySelector(".rates__toggle");
@@ -89,8 +93,16 @@ export function initRates() {
     }
     track("cta_click", { location: "rates", plan, cycle });
     if (plan === "free") return; // a real link to /app/
-    document.getElementById("signupEmail")?.focus({ preventScroll: false });
+
+    // No checkout link for this plan yet, so the list is where the interest lands.
+    intent = plan;
+    const msg = document.getElementById("signupMsg");
+    if (msg) {
+      msg.className = "summon__msg";
+      msg.textContent = `${PLANS[plan].name} — leave an address and you'll be first in.`;
+    }
     document.querySelector(".summon")?.scrollIntoView({ behavior: "smooth", block: "center" });
+    document.getElementById("signupEmail")?.focus({ preventScroll: true });
   });
 
   render();
@@ -120,9 +132,10 @@ export function initSignup() {
     button.disabled = true;
     say("Sending…");
     try {
-      await captureLead(input.value, { source: "landing" });
-      say("You're on the list.", "ok");
+      await captureLead(input.value, { source: intent ? "rates" : "landing", plan: intent });
+      say(intent ? `You're on the ${PLANS[intent].name} list.` : "You're on the list.", "ok");
       form.reset();
+      intent = null;
     } catch (err) {
       console.error(err);
       say("Something broke on our end. Try again in a moment.", "error");
