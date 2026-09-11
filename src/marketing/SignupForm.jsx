@@ -32,7 +32,7 @@ export default function SignupForm({ source = "landing", plan = null, cta = "Get
         type="email"
         inputMode="email"
         autoComplete="email"
-        placeholder="you@studio.com"
+        placeholder="Nyxxi@studio.com"
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         onFocus={() => track("signup_focus", { source, plan })}

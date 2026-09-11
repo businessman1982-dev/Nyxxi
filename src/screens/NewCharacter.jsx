@@ -14,7 +14,7 @@ export default function NewCharacter({ nav, addCharacter, limits, gate }) {
     <div>
       <Header title="New character" onBack={() => nav({ screen: "dashboard" })} />
       <div style={{ padding: "24px 16px" }}>
-        <TextField label="Name" value={name} onChange={setName} placeholder="e.g. Nixie Blaze" />
+        <TextField label="Name" value={name} onChange={setName} placeholder="e.g. Nyxxi Blaze" />
 
         <p style={{ fontSize: 12, color: "var(--text-secondary)", margin: "0 0 8px" }}>
           Character sheet ({sheets.length}/{maxSheets})
