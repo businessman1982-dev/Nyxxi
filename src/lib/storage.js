@@ -27,6 +27,10 @@ export function loadTheme() {
     const t = localStorage.getItem(THEME_KEY);
     if (t === "light" || t === "dark") return t;
   } catch {}
+  // Honour a theme already stamped on the document — our own pre-paint script, or a
+  // host that renders the page inside its own theme — before asking the OS.
+  const stamped = document.documentElement.dataset.theme;
+  if (stamped === "light" || stamped === "dark") return stamped;
   return window.matchMedia?.("(prefers-color-scheme: light)").matches ? "light" : "dark";
 }
 
