@@ -111,13 +111,27 @@ Copy `.env.example` to `.env` and fill in what you have:
 | `VITE_CHECKOUT_AGENCY_MONTHLY` | Same, Agency                                                          |
 | `VITE_CHECKOUT_AGENCY_YEARLY`  | Same, Agency yearly                                                   |
 | `VITE_SIGNUP_ENDPOINT`         | POST target for email capture; receives `{ email, source, plan, at }` |
+| `VITE_SIGNUP_FORMAT`           | `json` (default) or `form` — see below                                |
 
 Any checkout link left blank turns that rate's button into a jump to the early-access
 list, so the page still converts before billing is wired up.
 
 **`VITE_SIGNUP_ENDPOINT` is not optional in production.** With it unset, signups are
 written to the visitor's own `localStorage` and never reach you — the console warns on
-every capture.
+every capture. It is a URL that accepts a POST, not an email address.
+
+### Collecting signups in a Google Sheet
+
+`scripts/lead-sink.gs` turns a Sheet into that endpoint — free, no third party, and the
+list stays yours. Paste it into the Sheet's Apps Script editor, deploy as a web app with
+access set to **Anyone**, and put the `/exec` URL it gives you in `VITE_SIGNUP_ENDPOINT`.
+Each signup lands as a row; a repeat address updates its row instead of duplicating.
+
+Set `VITE_SIGNUP_FORMAT=form` for this route. Apps Script cannot answer the CORS
+preflight that a JSON body triggers, so `json` mode fails in the browser before the
+request is ever sent. `form` posts as `application/x-www-form-urlencoded`, which is a
+CORS-simple request and skips the preflight. Hosted services that answer OPTIONS
+properly (Formspree, Buttondown, your own API) work on the `json` default.
 
 Conversion events (`cta_click`, `pricing_yearly_viewed`, `checkout_start`,
 `paywall_hit`, `lead_captured`) are pushed to `window.dataLayer` and
