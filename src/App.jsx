@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { loadState, saveState } from "./lib/storage.js";
+import { loadState, saveState, loadTheme, saveTheme } from "./lib/storage.js";
 import { loadPlan, PLANS, quota } from "./lib/plans.js";
 import { track } from "./lib/leads.js";
 import { uid } from "./lib/utils.js";
+import { buildDemo } from "./lib/demo.js";
 import Dashboard from "./screens/Dashboard.jsx";
 import CharacterList from "./screens/CharacterList.jsx";
 import NewCharacter from "./screens/NewCharacter.jsx";
@@ -11,17 +12,29 @@ import PromptList from "./screens/PromptList.jsx";
 import NewPrompt from "./screens/NewPrompt.jsx";
 import PromptDetail from "./screens/PromptDetail.jsx";
 import AssetVault from "./screens/AssetVault.jsx";
+import LocationList from "./screens/LocationList.jsx";
 import Upgrade from "./screens/Upgrade.jsx";
 
-export default function App({ theme, onToggleTheme, onExitToSite }) {
+/** The landing page lives at the site root; the app is served from /app/. */
+const exitToSite = (anchor) => {
+  window.location.href = anchor ? `/${anchor}` : "/";
+};
+
+export default function App() {
   const [state, setState] = useState(loadState);
   const [route, setRoute] = useState({ screen: "dashboard" });
   const [search, setSearch] = useState("");
+  const [theme, setTheme] = useState(loadTheme);
   const [plan] = useState(loadPlan);
 
   useEffect(() => {
     saveState(state);
   }, [state]);
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    saveTheme(theme);
+  }, [theme]);
 
   const nav = (r) => {
     setSearch("");
@@ -55,6 +68,19 @@ export default function App({ theme, onToggleTheme, onExitToSite }) {
     }));
   const addPrompt = (p) => setState((s) => ({ ...s, prompts: [...s.prompts, p] }));
   const deletePrompt = (id) => setState((s) => ({ ...s, prompts: s.prompts.filter((p) => p.id !== id) }));
+  const addLocation = (l) => setState((s) => ({ ...s, locations: [...s.locations, l] }));
+  const deleteLocation = (id) =>
+    setState((s) => ({ ...s, locations: s.locations.filter((l) => l.id !== id) }));
+  const loadDemo = () => {
+    const demo = buildDemo();
+    setState((s) => ({
+      ...s,
+      characters: [...s.characters, ...demo.characters],
+      locations: [...s.locations, ...demo.locations],
+      prompts: [...s.prompts, ...demo.prompts],
+    }));
+    nav({ screen: "character", id: demo.characterId });
+  };
   const generate = (prompt) =>
     setState((s) => ({
       ...s,
@@ -77,6 +103,7 @@ export default function App({ theme, onToggleTheme, onExitToSite }) {
         nav={nav}
         search={search}
         setSearch={setSearch}
+        loadDemo={loadDemo}
         limits={limits}
         gate={gate}
       />
@@ -94,6 +121,8 @@ export default function App({ theme, onToggleTheme, onExitToSite }) {
         route={route}
         updateCharacter={updateCharacter}
         deleteCharacter={deleteCharacter}
+        addPrompt={addPrompt}
+        locations={state.locations}
         limits={limits}
         gate={gate}
       />
@@ -114,15 +143,17 @@ export default function App({ theme, onToggleTheme, onExitToSite }) {
         gate={gate}
       />
     );
+  else if (route.screen === "locations")
+    screen = <LocationList state={state} nav={nav} addLocation={addLocation} deleteLocation={deleteLocation} />;
   else if (route.screen === "vault") screen = <AssetVault state={state} nav={nav} />;
   else if (route.screen === "upgrade")
-    screen = <Upgrade nav={nav} route={route} onExitToSite={onExitToSite} />;
+    screen = <Upgrade nav={nav} route={route} onExitToSite={exitToSite} />;
 
   return (
     <div className="app-shell">
       <div className="app-topbar">
         <div>
-          <p className="app-wordmark" onClick={() => onExitToSite()} style={{ cursor: "pointer" }}>
+          <p className="app-wordmark" onClick={() => exitToSite()} style={{ cursor: "pointer" }}>
             NYX<span>XI</span>
           </p>
           <p className="app-tagline">AI Creator OS</p>
@@ -135,7 +166,11 @@ export default function App({ theme, onToggleTheme, onExitToSite }) {
             {PLANS[plan].name}
             {plan === "free" && <span> · Upgrade</span>}
           </button>
-          <button className="theme-toggle" aria-label="Toggle theme" onClick={onToggleTheme}>
+          <button
+            className="theme-toggle"
+            aria-label="Toggle theme"
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+          >
             {theme === "dark" ? "☀️" : "\u{1F319}"}
           </button>
         </div>

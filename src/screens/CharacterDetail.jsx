@@ -3,9 +3,11 @@ import Header from "../components/Header.jsx";
 import PhotoSlot from "../components/PhotoSlot.jsx";
 import Button from "../components/Button.jsx";
 import TextField from "../components/TextField.jsx";
+import NotesField from "../components/NotesField.jsx";
 import { uid } from "../lib/utils.js";
+import { KINDS, groupByKind, isHairLine } from "../lib/wardrobe.js";
 
-export default function CharacterDetail({ state, nav, route, updateCharacter, deleteCharacter, limits, gate }) {
+export default function CharacterDetail({ state, nav, route, updateCharacter, deleteCharacter, addPrompt, locations, limits, gate }) {
   const character = state.characters.find((c) => c.id === route.id);
   const [tab, setTab] = useState(route.tab || "profile");
   if (!character) return null;
@@ -30,12 +32,12 @@ export default function CharacterDetail({ state, nav, route, updateCharacter, de
         </span>
       </div>
       <div style={{ display: "flex", borderTop: "0.5px solid var(--border)", borderBottom: "0.5px solid var(--border)" }}>
-        {["profile", "wardrobe", "prompts"].map((t) => (
+        {["profile", "wardrobe", "compose", "prompts"].map((t) => (
           <div
             key={t}
             onClick={() => setTab(t)}
             style={{
-              flex: 1, textAlign: "center", padding: "10px 0", fontSize: 13, cursor: "pointer",
+              flex: 1, textAlign: "center", padding: "10px 0", fontSize: 12, cursor: "pointer",
               fontWeight: tab === t ? 500 : 400,
               color: tab === t ? "var(--text-primary)" : "var(--text-secondary)",
               borderBottom: tab === t ? "2px solid var(--border-accent)" : "2px solid transparent",
@@ -47,23 +49,23 @@ export default function CharacterDetail({ state, nav, route, updateCharacter, de
       </div>
 
       {tab === "profile" && (
-        <div style={{ padding: 16 }}>
-          <p style={{ fontSize: 11, color: "var(--text-muted)", margin: "0 0 8px" }}>
-            Character sheets ({character.sheets.length}/{limits.sheets})
-          </p>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 10 }}>
-            {character.sheets.map((s, i) => (
-              <PhotoSlot key={i} src={s} onRemove={() => updateCharacter(character.id, { sheets: character.sheets.filter((_, j) => j !== i) })} />
-            ))}
-            {character.sheets.length < limits.sheets && (
-              <PhotoSlot onAdd={(url) => updateCharacter(character.id, { sheets: [...character.sheets, url] })} />
-            )}
-          </div>
-        </div>
+<ProfileTab character={character} updateCharacter={updateCharacter} maxSheets={limits.sheets} />
       )}
 
       {tab === "wardrobe" && (
         <WardrobeTab character={character} updateCharacter={updateCharacter} />
+      )}
+
+      {tab === "compose" && (
+        <ComposeTab
+          character={character}
+          nav={nav}
+          addPrompt={addPrompt}
+          setTab={setTab}
+          locations={locations || []}
+          limits={limits}
+          gate={gate}
+        />
       )}
 
       {tab === "prompts" && (
@@ -73,61 +75,150 @@ export default function CharacterDetail({ state, nav, route, updateCharacter, de
   );
 }
 
+function ProfileTab({ character, updateCharacter, maxSheets }) {
+  return (
+    <div style={{ padding: 16 }}>
+      <p style={{ fontSize: 11, color: "var(--text-muted)", margin: "0 0 8px" }}>
+        Character sheets ({character.sheets.length}/{maxSheets})
+      </p>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 10, marginBottom: 24 }}>
+        {character.sheets.map((s, i) => (
+          <PhotoSlot key={i} src={s} onRemove={() => updateCharacter(character.id, { sheets: character.sheets.filter((_, j) => j !== i) })} />
+        ))}
+        {character.sheets.length < maxSheets && (
+          <PhotoSlot onAdd={(url) => updateCharacter(character.id, { sheets: [...character.sheets, url] })} />
+        )}
+      </div>
+
+      <NotesField
+        label="Look"
+        hint={"The physical description you paste into every image prompt. Keep it to what the generator needs to draw " + character.name + " — no story, no personality."}
+        value={character.look}
+        onCommit={(look) => updateCharacter(character.id, { look })}
+        copyLabel="Copy look"
+        rows={8}
+        placeholder={
+          "Skin — tone, texture, freckles, scars\n" +
+          "Hair — colour, length, cut, how it falls\n" +
+          "Eyes — colour, shape\n" +
+          "Face and build — bone structure, age, height, frame\n" +
+          "Never — the details that keep coming out wrong"
+        }
+      />
+
+      <NotesField
+        label="Bible"
+        hint={"Who " + character.name + " is. Backstory, personality, how they carry themselves — the context that shapes a shot without describing a pixel of it."}
+        value={character.bible}
+        onCommit={(bible) => updateCharacter(character.id, { bible })}
+        copyLabel="Copy bible"
+        rows={8}
+        placeholder={
+          "Who they are, where they came from, what they want.\n" +
+          "How they hold themselves. How they look at a camera.\n" +
+          "The moods and settings they belong in — and the ones they don't."
+        }
+      />
+    </div>
+  );
+}
+
 function WardrobeTab({ character, updateCharacter }) {
   const [adding, setAdding] = useState(false);
+  const [kind, setKind] = useState("outfit");
   const [note, setNote] = useState("");
   const [photo, setPhoto] = useState(null);
+
+  const selectStyle = {
+    width: "100%", marginBottom: 18, padding: "10px 12px", fontSize: 13,
+    background: "var(--fill-secondary)", color: "var(--text-primary)",
+    border: "0.5px solid var(--border-strong)", borderRadius: "var(--radius)",
+  };
 
   if (adding) {
     return (
       <div>
-        <Header title="Add outfit" onBack={() => setAdding(false)} />
+        <Header title="Add to wardrobe" onBack={() => setAdding(false)} />
         <div style={{ padding: "18px 16px" }}>
-          <TextField label="Outfit note" value={note} onChange={setNote} placeholder="e.g. Red bodysuit, stage look" />
+          <p style={{ fontSize: 12, color: "var(--text-secondary)", margin: "0 0 8px" }}>Kind</p>
+          <select value={kind} onChange={(e) => setKind(e.target.value)} style={selectStyle}>
+            {KINDS.map((k) => (
+              <option key={k.id} value={k.id}>{k.label}</option>
+            ))}
+          </select>
+          <TextField
+            label="Description"
+            value={note}
+            onChange={setNote}
+            placeholder={
+              kind === "hair" ? "e.g. Platinum bob wig, blunt fringe"
+                : kind === "shoes" ? "e.g. Silver ankle boots, scuffed"
+                : kind === "bag" ? "e.g. Small black crossbody"
+                : kind === "jewellery" ? "e.g. Thin gold hoops, signet ring"
+                : kind === "other" ? "e.g. Wire-frame glasses"
+                : "e.g. Black tour coat, matte"
+            }
+          />
           <p style={{ fontSize: 12, color: "var(--text-secondary)", margin: "0 0 8px" }}>Photo</p>
-          <div style={{ maxWidth: 140, margin: "0 auto 22px" }}>
+          <div style={{ maxWidth: 140, margin: "0 auto 8px" }}>
             <PhotoSlot src={photo} onAdd={setPhoto} onRemove={() => setPhoto(null)} />
           </div>
+          <p style={{ fontSize: 11, color: "var(--text-muted)", margin: "0 0 22px", textAlign: "center", lineHeight: 1.5 }}>
+            {kind === "hair"
+              ? "A wig, a piece, or just a different style — anything that changes the hair."
+              : "Shoot a piece on its own, or leave it in the photo of the outfit it goes with."}
+          </p>
           <Button
             variant="primary"
             disabled={!note.trim() || !photo}
             onClick={() => {
               updateCharacter(character.id, {
-                wardrobe: [...(character.wardrobe || []), { id: uid(), note: note.trim(), photo }],
+                wardrobe: [...(character.wardrobe || []), { id: uid(), kind, note: note.trim(), photo }],
               });
               setAdding(false);
               setNote("");
               setPhoto(null);
             }}
           >
-            Add outfit
+            Add to wardrobe
           </Button>
         </div>
       </div>
     );
   }
 
+  const groups = groupByKind(character.wardrobe);
   const wardrobe = character.wardrobe || [];
   return (
     <div style={{ padding: 16 }}>
-      {wardrobe.length === 0 ? (
-        <p style={{ fontSize: 13, color: "var(--text-muted)", textAlign: "center", padding: "20px 0" }}>
-          No outfits yet — add your first look for {character.name}.
+      {groups.length === 0 ? (
+        <p style={{ fontSize: 13, color: "var(--text-muted)", textAlign: "center", padding: "20px 0", lineHeight: 1.6 }}>
+          Nothing in {character.name}&rsquo;s wardrobe yet — clothes, shoes, bags and
+          jewellery all live here.
         </p>
       ) : (
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 10, marginBottom: 12 }}>
-          {wardrobe.map((w) => (
-            <div key={w.id}>
-              <PhotoSlot
-                src={w.photo}
-                onRemove={() => updateCharacter(character.id, { wardrobe: wardrobe.filter((x) => x.id !== w.id) })}
-              />
-              <p style={{ fontSize: 12, fontWeight: 500, margin: "6px 0 0" }}>{w.note}</p>
+        groups.map((g) => (
+          <div key={g.id} style={{ marginBottom: 18 }}>
+            <p style={{ fontSize: 11, color: "var(--text-muted)", margin: "0 0 8px" }}>
+              {g.label} ({g.items.length})
+            </p>
+            {/* garments get room; accessories are small things and read
+                better packed tighter */}
+            <div style={{ display: "grid", gridTemplateColumns: `repeat(${g.id === "outfit" ? 2 : 3}, 1fr)`, gap: 10 }}>
+              {g.items.map((w) => (
+                <div key={w.id}>
+                  <PhotoSlot
+                    src={w.photo}
+                    onRemove={() => updateCharacter(character.id, { wardrobe: wardrobe.filter((x) => x.id !== w.id) })}
+                  />
+                  <p style={{ fontSize: g.id === "outfit" ? 12 : 11, fontWeight: 500, margin: "6px 0 0", lineHeight: 1.4 }}>{w.note}</p>
+                </div>
+              ))}
             </div>
-          ))}
-        </div>
+          </div>
+        ))
       )}
-      <Button onClick={() => setAdding(true)}>+ Add outfit</Button>
+      <Button onClick={() => setAdding(true)}>+ Add to wardrobe</Button>
     </div>
   );
 }
@@ -162,6 +253,193 @@ function PromptsTab({ state, nav, character, limits, gate }) {
       >
         {limits.prompts.exceeded ? "Upgrade for more prompts" : "+ New prompt"}
       </Button>
+    </div>
+  );
+}
+
+function ComposeTab({ character, nav, addPrompt, setTab, locations, limits, gate }) {
+  const [picked, setPicked] = useState({});
+  const [locationId, setLocationId] = useState("");
+  const [scene, setScene] = useState("");
+  const [extra, setExtra] = useState("");
+  const [copied, setCopied] = useState(false);
+
+  const look = (character.look || "").trim();
+  const groups = groupByKind(character.wardrobe);
+  const location = locations.find((l) => l.id === locationId);
+
+  const chosen = groups
+    .map((g) => ({ group: g, item: g.items.find((i) => i.id === picked[g.id]) }))
+    .filter((c) => c.item)
+    .sort((a, b) => a.group.rank - b.group.rank);
+
+  // A look usually pins the hair. Picking a hair piece for this shot would
+  // otherwise leave the prompt saying two different things, so the piece wins
+  // and the look's hair line steps aside.
+  const hairPicked = chosen.some((c) => c.group.id === "hair");
+  const lookLines = look.split("\n");
+  const hairOverridden = hairPicked && lookLines.some(isHairLine);
+  const lookText = (hairPicked ? lookLines.filter((l) => !isHairLine(l)) : lookLines).join("\n");
+
+  // A saved location contributes its description; free text either stands in
+  // for one or adds to it.
+  const sceneText = [location ? location.note || location.name : "", scene.trim()]
+    .filter(Boolean)
+    .join(", ");
+
+  const prompt = [
+    lookText,
+    ...chosen.map((c) => `${c.group.prefix}: ${c.item.note}`),
+    sceneText ? `Scene: ${sceneText}` : "",
+    extra.trim(),
+  ]
+    .filter(Boolean)
+    .join("\n");
+
+  // Photos can't live inside a text prompt, so they travel alongside it.
+  const refs = [
+    ...(character.sheets || []).map((src) => ({ src, label: character.name })),
+    ...chosen.filter((c) => c.item.photo).map((c) => ({ src: c.item.photo, label: c.item.note })),
+    ...(location?.photo ? [{ src: location.photo, label: location.name }] : []),
+  ];
+
+  if (!look) {
+    return (
+      <div style={{ padding: 16 }}>
+        <p style={{ fontSize: 13, color: "var(--text-muted)", textAlign: "center", padding: "18px 0", lineHeight: 1.6 }}>
+          Write {character.name}&rsquo;s look first — that&rsquo;s the part every prompt starts from.
+        </p>
+        <Button onClick={() => setTab("profile")}>Write the look</Button>
+      </div>
+    );
+  }
+
+  const copy = async () => {
+    try {
+      await navigator.clipboard.writeText(prompt);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      setCopied(false);
+    }
+  };
+
+  const selectStyle = {
+    width: "100%", marginBottom: 18, padding: "10px 12px", fontSize: 13,
+    background: "var(--fill-secondary)", color: "var(--text-primary)",
+    border: "0.5px solid var(--border-strong)", borderRadius: "var(--radius)",
+  };
+
+  return (
+    <div style={{ padding: 16 }}>
+      <p style={{ fontSize: 11, color: "var(--text-muted)", margin: "0 0 14px", lineHeight: 1.5 }}>
+        {character.name}&rsquo;s look stays locked. Swap what she wears and where she is.
+      </p>
+
+      {groups.length === 0 ? (
+        <p style={{ fontSize: 12, color: "var(--text-muted)", margin: "0 0 18px", lineHeight: 1.5 }}>
+          Nothing in the wardrobe yet — add clothes, shoes, bags or jewellery and they
+          will show up here.
+        </p>
+      ) : (
+        groups.map((g) => (
+          <div key={g.id}>
+            <p style={{ fontSize: 12, color: "var(--text-secondary)", margin: "0 0 8px" }}>{g.label}</p>
+            <select
+              value={picked[g.id] || ""}
+              onChange={(e) => setPicked({ ...picked, [g.id]: e.target.value })}
+              style={{ ...selectStyle, marginBottom: g.id === "hair" && hairOverridden ? 6 : 18 }}
+            >
+              <option value="">None</option>
+              {g.items.map((i) => (
+                <option key={i.id} value={i.id}>{i.note}</option>
+              ))}
+            </select>
+            {g.id === "hair" && hairOverridden && (
+              <p style={{ fontSize: 11, color: "var(--text-muted)", margin: "0 0 18px", lineHeight: 1.5 }}>
+                Using this instead of the hair in {character.name}&rsquo;s look.
+              </p>
+            )}
+          </div>
+        ))
+      )}
+
+      <p style={{ fontSize: 12, color: "var(--text-secondary)", margin: "0 0 8px" }}>Location</p>
+      {locations.length > 0 && (
+        <select value={locationId} onChange={(e) => setLocationId(e.target.value)} style={selectStyle}>
+          <option value="">No saved location</option>
+          {locations.map((l) => (
+            <option key={l.id} value={l.id}>{l.name}</option>
+          ))}
+        </select>
+      )}
+      <TextField
+        value={scene}
+        onChange={setScene}
+        area
+        rows={2}
+        placeholder={
+          locations.length > 0
+            ? "…or describe one here, or add to the saved one"
+            : "Describe the location — or save one under Locations to reuse it"
+        }
+      />
+
+      <TextField label="Anything else" area rows={2} value={extra} onChange={setExtra} placeholder="e.g. 35mm, shallow depth, cold key light" />
+
+      <p style={{ fontSize: 12, color: "var(--text-secondary)", margin: "0 0 8px" }}>Prompt</p>
+      <pre
+        style={{
+          margin: "0 0 12px", padding: 12, fontSize: 12, lineHeight: 1.7, whiteSpace: "pre-wrap",
+          wordBreak: "break-word", fontFamily: "inherit", background: "var(--fill-secondary)",
+          border: "0.5px solid var(--border)", borderRadius: "var(--radius)", color: "var(--text-primary)",
+        }}
+      >
+        {prompt}
+      </pre>
+
+      <div style={{ display: "flex", flexDirection: "column", gap: 8, marginBottom: 22 }}>
+        <Button variant="primary" onClick={copy}>{copied ? "Copied" : "Copy prompt"}</Button>
+        <Button
+          onClick={() => {
+            if (limits.prompts.exceeded) return gate("prompts");
+            const id = uid();
+            addPrompt({ id, text: prompt, characterId: character.id });
+            nav({ screen: "prompt", id });
+          }}
+        >
+          {limits.prompts.exceeded ? "Upgrade to save this prompt" : "✦ Save to prompt vault"}
+        </Button>
+      </div>
+
+      {refs.length > 0 && (
+        <>
+          <p style={{ fontSize: 12, color: "var(--text-secondary)", margin: "0 0 4px" }}>
+            Reference images ({refs.length})
+          </p>
+          <p style={{ fontSize: 11, color: "var(--text-muted)", margin: "0 0 10px", lineHeight: 1.5 }}>
+            Images can&rsquo;t go into a text prompt. Attach these in your generator alongside
+            the prompt above.
+          </p>
+          <div style={{ display: "flex", gap: 8, overflowX: "auto", paddingBottom: 4 }}>
+            {refs.map((r, i) => (
+              <div key={i} style={{ flex: "none", width: 78 }}>
+                <img
+                  src={r.src}
+                  alt={r.label}
+                  style={{ width: 78, height: 78, objectFit: "cover", borderRadius: 8, display: "block" }}
+                />
+                <p style={{
+                  fontSize: 10, color: "var(--text-muted)", margin: "4px 0 0",
+                  overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
+                }}>
+                  {r.label}
+                </p>
+              </div>
+            ))}
+          </div>
+        </>
+      )}
     </div>
   );
 }

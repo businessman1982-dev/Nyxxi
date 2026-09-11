@@ -3,14 +3,24 @@ import Button from "../components/Button.jsx";
 import Tile from "../components/Tile.jsx";
 import UpgradeBanner from "../components/UpgradeBanner.jsx";
 
-export default function Dashboard({ state, nav, search, setSearch, limits, gate }) {
+export default function Dashboard({ state, nav, search, setSearch, loadDemo, limits, gate }) {
   const hasCharacters = state.characters.length > 0;
   const newCharacter = () =>
     limits.characters.exceeded ? gate("characters") : nav({ screen: "newCharacter" });
   const results = search.trim()
     ? {
-        characters: state.characters.filter((c) => c.name.toLowerCase().includes(search.toLowerCase())),
+        characters: state.characters.filter(
+          (c) =>
+            c.name.toLowerCase().includes(search.toLowerCase()) ||
+            (c.look || "").toLowerCase().includes(search.toLowerCase()) ||
+            (c.bible || "").toLowerCase().includes(search.toLowerCase())
+        ),
         prompts: state.prompts.filter((p) => p.text.toLowerCase().includes(search.toLowerCase())),
+        locations: state.locations.filter(
+          (l) =>
+            l.name.toLowerCase().includes(search.toLowerCase()) ||
+            (l.note || "").toLowerCase().includes(search.toLowerCase())
+        ),
         wardrobe: state.characters.flatMap((c) =>
           (c.wardrobe || [])
             .filter((w) => w.note.toLowerCase().includes(search.toLowerCase()))
@@ -25,7 +35,7 @@ export default function Dashboard({ state, nav, search, setSearch, limits, gate 
         <p style={{ fontSize: 17, fontWeight: 500, margin: "0 0 14px" }}>Dashboard</p>
         <input
           type="text"
-          placeholder="Search characters, wardrobe, prompts..."
+          placeholder="Search characters, looks, wardrobe, locations, prompts..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           style={{ width: "100%" }}
@@ -34,7 +44,7 @@ export default function Dashboard({ state, nav, search, setSearch, limits, gate 
 
       {results ? (
         <div style={{ padding: "12px 16px" }}>
-          {results.characters.length === 0 && results.prompts.length === 0 && results.wardrobe.length === 0 && (
+          {results.characters.length === 0 && results.prompts.length === 0 && results.wardrobe.length === 0 && results.locations.length === 0 && (
             <p style={{ fontSize: 13, color: "var(--text-muted)", textAlign: "center", padding: "24px 0" }}>
               No matches.
             </p>
@@ -76,6 +86,22 @@ export default function Dashboard({ state, nav, search, setSearch, limits, gate 
               </div>
             </>
           )}
+          {results.locations.length > 0 && (
+            <>
+              <p style={{ fontSize: 12, color: "var(--text-muted)", margin: "0 0 8px" }}>Locations</p>
+              <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 16 }}>
+                {results.locations.map((l) => (
+                  <div
+                    key={l.id}
+                    onClick={() => nav({ screen: "locations" })}
+                    style={{ border: "0.5px solid var(--border)", borderRadius: "var(--radius)", padding: "8px 10px", cursor: "pointer" }}
+                  >
+                    <p style={{ fontSize: 13, margin: 0 }}>{l.name}</p>
+                  </div>
+                ))}
+              </div>
+            </>
+          )}
           {results.prompts.length > 0 && (
             <>
               <p style={{ fontSize: 12, color: "var(--text-muted)", margin: "0 0 8px" }}>Prompts</p>
@@ -106,6 +132,15 @@ export default function Dashboard({ state, nav, search, setSearch, limits, gate 
           <Button variant="primary" style={{ width: "auto", padding: "11px 22px" }} onClick={newCharacter}>
             + Create character
           </Button>
+          <p
+            onClick={loadDemo}
+            style={{ fontSize: 12, color: "var(--text-accent)", cursor: "pointer", margin: "16px 0 0" }}
+          >
+            Or load a demo character
+          </p>
+          <p style={{ fontSize: 11, color: "var(--text-muted)", margin: "6px 0 0", lineHeight: 1.5 }}>
+            A worked example with a look, a wardrobe and locations. Delete it whenever.
+          </p>
           <div style={{ display: "flex", gap: 16, justifyContent: "center", marginTop: 24 }}>
             <span onClick={() => nav({ screen: "prompts" })} style={{ fontSize: 11, color: "var(--text-muted)", cursor: "pointer" }}>Prompt vault</span>
             <span onClick={() => nav({ screen: "vault" })} style={{ fontSize: 11, color: "var(--text-muted)", cursor: "pointer" }}>Asset vault</span>
@@ -117,6 +152,7 @@ export default function Dashboard({ state, nav, search, setSearch, limits, gate 
           <div style={{ padding: "0 16px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
           <Tile icon="👤" label="Characters" onClick={() => nav({ screen: "characters" })} />
           <Tile icon="✏️" label="Prompt vault" onClick={() => nav({ screen: "prompts" })} />
+          <Tile icon="📍" label="Locations" onClick={() => nav({ screen: "locations" })} />
           <Tile icon="🖼️" label="Asset vault" onClick={() => nav({ screen: "vault" })} />
           <Tile icon="+" label="Create a character" dashed onClick={newCharacter} />
           </div>

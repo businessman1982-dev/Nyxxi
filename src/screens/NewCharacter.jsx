@@ -9,6 +9,7 @@ export default function NewCharacter({ nav, addCharacter, limits, gate }) {
   const maxSheets = limits.sheets;
   const [name, setName] = useState("");
   const [sheets, setSheets] = useState([]);
+  const [look, setLook] = useState("");
 
   return (
     <div>
@@ -28,13 +29,22 @@ export default function NewCharacter({ nav, addCharacter, limits, gate }) {
           )}
         </div>
 
+        <TextField
+          label="Look (optional — you can write this later)"
+          area
+          rows={5}
+          value={look}
+          onChange={setLook}
+          placeholder="Skin, hair, eyes, face and build. The physical description you'll paste into every image prompt."
+        />
+
         <Button
           variant="primary"
           disabled={!name.trim() || sheets.length === 0}
           onClick={() => {
             if (limits.characters.exceeded) return gate("characters");
             const id = uid();
-            addCharacter({ id, name: name.trim(), sheets, wardrobe: [] });
+            addCharacter({ id, name: name.trim(), sheets, look: look.trim(), bible: "", wardrobe: [] });
             nav({ screen: "character", id });
           }}
         >
