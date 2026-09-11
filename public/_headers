@@ -1,0 +1,27 @@
+# Cloudflare Pages / Netlify header rules.
+# Vite fingerprints filenames in /assets, so those can be cached forever; the
+# HTML that points at them must not be, or a deploy won't reach anyone.
+
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: geolocation=(), microphone=(), camera=(), interest-cohort=()
+
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/fonts/*
+  Cache-Control: public, max-age=31536000, immutable
+  Access-Control-Allow-Origin: *
+
+/
+  Cache-Control: public, max-age=0, must-revalidate
+
+/index.html
+  Cache-Control: public, max-age=0, must-revalidate
+
+/app/
+  Cache-Control: public, max-age=0, must-revalidate
+
+/app/index.html
+  Cache-Control: public, max-age=0, must-revalidate

@@ -137,6 +137,11 @@ Conversion events (`cta_click`, `pricing_yearly_viewed`, `checkout_start`,
 `paywall_hit`, `lead_captured`) are pushed to `window.dataLayer` and
 `window.plausible` when either is present, and silently dropped when neither is.
 
+## Deploying
+
+Step-by-step for putting the site online and collecting signups for real:
+**[DEPLOY.md](DEPLOY.md)**.
+
 ## Getting started
 
 ```bash

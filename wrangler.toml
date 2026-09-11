@@ -1,0 +1,5 @@
+# Only needed if you deploy from your machine with `npx wrangler pages deploy`.
+# The GitHub integration reads its build settings from the Pages dashboard
+# instead, and ignores this file.
+name = "nyxxi"
+pages_build_output_dir = "dist"

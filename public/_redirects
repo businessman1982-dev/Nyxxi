@@ -1,0 +1,3 @@
+# The app is a real directory (/app/index.html), so it needs no SPA fallback —
+# only the tidy-up from the bare path to it.
+/app  /app/  301
