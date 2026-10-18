@@ -34,7 +34,8 @@ export default function Dashboard({ state, nav, search, setSearch, loadDemo, lim
       <div style={{ padding: "18px 16px 8px" }}>
         <p style={{ fontSize: 17, fontWeight: 500, margin: "0 0 14px" }}>Dashboard</p>
         <input
-          type="text"
+          type="search"
+          aria-label="Search characters, looks, wardrobe, locations, prompts"
           placeholder="Search characters, looks, wardrobe, locations, prompts..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}

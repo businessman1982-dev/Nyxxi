@@ -609,7 +609,7 @@ p { margin: 0; }
   font-family: var(--mono);
   font-size: 10px;
   letter-spacing: 0.34em;
-  color: #7a6fd0;
+  color: #5b50b8;
   margin-bottom: clamp(22px, 3vw, 40px);
 }
 .manifesto { max-width: 1200px; margin: 0 auto; }
@@ -652,7 +652,7 @@ p { margin: 0; }
   font-family: var(--mono);
   font-size: 10px;
   letter-spacing: 0.3em;
-  color: #9a94b8;
+  color: #635d80;
   margin-bottom: 14px;
 }
 .row__copy h3 {
@@ -754,7 +754,7 @@ p { margin: 0; }
   font-family: var(--mono);
   font-size: 10px;
   letter-spacing: 0.24em;
-  color: #7d788f;
+  color: #5f5a72;
 }
 
 .marquee {
@@ -795,7 +795,7 @@ p { margin: 0; }
   color: var(--nyx);
   margin-bottom: 18px;
 }
-.step h4 {
+.step h3 {
   font-family: var(--display);
   font-size: clamp(22px, 2.2vw, 34px);
   margin-bottom: 10px;
@@ -860,7 +860,7 @@ p { margin: 0; }
   font-family: var(--mono);
   font-size: 9px;
   letter-spacing: 0.24em;
-  color: var(--dim);
+  color: #8b87a0;
   padding-left: 14px;
   border-left: 1px solid rgba(139, 127, 240, 0.2);
 }
@@ -889,7 +889,7 @@ p { margin: 0; }
   font-family: var(--mono);
   font-size: 9px;
   letter-spacing: 0.22em;
-  color: var(--dim);
+  color: #8b87a0;
 }
 
 /* ── grain + vignette: sells the "one shot" feel, fades at the seam ── */
@@ -1000,7 +1000,7 @@ p { margin: 0; }
   color: var(--ember);
 }
 
-.rates__toggle button[aria-pressed="false"] i { color: #a8792f; }
+.rates__toggle button[aria-pressed="false"] i { color: #85601f; }
 
 .rates__grid {
   display: grid;
@@ -1037,7 +1037,7 @@ p { margin: 0; }
   font-size: 10px;
   letter-spacing: 0.3em;
   text-transform: uppercase;
-  color: #9a94b8;
+  color: #635d80;
   margin-bottom: 12px;
 }
 
@@ -1061,7 +1061,7 @@ p { margin: 0; }
   font-size: 10px;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: #9a94b8;
+  color: #635d80;
 }
 
 .rate__note {
@@ -1232,3 +1232,18 @@ p { margin: 0; }
   .summon__form input,
   .summon__form button { transition: none; }
 }
+
+/* ── mobile: the fixed chrome gets a solid backing so scrolled content
+   (e.g. the big CTA) never shows through or stacks under the header ── */
+@media (max-width: 760px) {
+  .chrome {
+    background: rgba(5, 5, 10, 0.86);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+    padding-top: 12px;
+    padding-bottom: 12px;
+    transition: color 0.45s var(--ease), background-color 0.45s var(--ease);
+  }
+  .chrome.on-light { background: rgba(244, 241, 234, 0.9); }
+}
+section[id], .cta, .summon { scroll-margin-top: 84px; }

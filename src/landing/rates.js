@@ -31,7 +31,9 @@ function rateCard(plan, cycle) {
 
   const cta = free
     ? `<a class="rate__cta" href="/app/" data-plan="free">${escape(plan.cta)}${ARROW}</a>`
-    : href
+    : plan.contact
+      ? `<a class="rate__cta" href="${escape(plan.contact)}" data-plan="${plan.id}">${escape(plan.cta)}${ARROW}</a>`
+      : href
       ? `<a class="rate__cta" href="${escape(href)}" data-plan="${plan.id}" data-checkout="1">${escape(plan.cta)}${ARROW}</a>`
       : `<button class="rate__cta" type="button" data-plan="${plan.id}">${escape(plan.cta)}${ARROW}</button>`;
 
@@ -93,6 +95,7 @@ export function initRates() {
     }
     track("cta_click", { location: "rates", plan, cycle });
     if (plan === "free") return; // a real link to /app/
+    if (cta.getAttribute("href")?.startsWith("mailto:")) return; // contact link
 
     // No checkout link for this plan yet, so the list is where the interest lands.
     intent = plan;

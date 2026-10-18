@@ -51,6 +51,7 @@ export const PLANS = {
       "Onboarding call",
     ],
     cta: "Talk to us",
+    contact: "mailto:Renegade821405@yahoo.com?subject=Nyxxi%20Agency",
   },
 };
 

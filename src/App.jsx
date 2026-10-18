@@ -168,14 +168,14 @@ export default function App() {
           </button>
           <button
             className="theme-toggle"
-            aria-label="Toggle theme"
+            aria-label={theme === "dark" ? "Switch to light theme" : "Switch to dark theme"}
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
           >
-            {theme === "dark" ? "☀️" : "\u{1F319}"}
+            <span aria-hidden="true">{theme === "dark" ? "☀️" : "\u{1F319}"}</span>
           </button>
         </div>
       </div>
-      <div className="app-card">{screen}</div>
+      <main className="app-card">{screen}</main>
     </div>
   );
 }

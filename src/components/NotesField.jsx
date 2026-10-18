@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import Button from "./Button.jsx";
 
 /**
@@ -18,6 +18,7 @@ export default function NotesField({
   rows = 8,
   copyLabel = "Copy",
 }) {
+  const id = useId();
   const [text, setText] = useState(value || "");
   const [saved, setSaved] = useState(true);
   const [copied, setCopied] = useState(false);
@@ -63,7 +64,7 @@ export default function NotesField({
   return (
     <div style={{ marginBottom: 26 }}>
       <div style={{ display: "flex", alignItems: "baseline", gap: 8, marginBottom: 6 }}>
-        <p style={{ fontSize: 12, fontWeight: 500, margin: 0, flex: 1 }}>
+        <label htmlFor={id} style={{ display: "block", fontSize: 12, fontWeight: 500, margin: 0, flex: 1 }}>
           {label}
           {words > 0 && (
             <span style={{ fontWeight: 400, color: "var(--text-muted)" }}>
@@ -71,7 +72,7 @@ export default function NotesField({
               {words} word{words === 1 ? "" : "s"}
             </span>
           )}
-        </p>
+        </label>
         <span style={{ fontSize: 11, color: saved ? "var(--text-muted)" : "var(--text-accent)" }}>
           {saved ? "Saved" : "Saving…"}
         </span>
@@ -82,6 +83,7 @@ export default function NotesField({
         </p>
       )}
       <textarea
+        id={id}
         rows={rows}
         value={text}
         placeholder={placeholder}

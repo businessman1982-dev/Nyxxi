@@ -1,7 +1,7 @@
 import { useRef } from "react";
 import { fileToDataUrl } from "../lib/utils.js";
 
-export default function PhotoSlot({ src, onAdd, onRemove, size = "100%" }) {
+export default function PhotoSlot({ src, onAdd, onRemove, size = "100%", label = "Add photo" }) {
   const inputRef = useRef(null);
   if (src) {
     return (
@@ -25,7 +25,16 @@ export default function PhotoSlot({ src, onAdd, onRemove, size = "100%" }) {
   }
   return (
     <div
+      role="button"
+      tabIndex={0}
+      aria-label={label}
       onClick={() => inputRef.current?.click()}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          inputRef.current?.click();
+        }
+      }}
       style={{
         width: size, aspectRatio: "1", borderRadius: 12, border: "1px dashed var(--border-strong)",
         display: "flex", alignItems: "center", justifyContent: "center", color: "var(--text-muted)",
@@ -36,6 +45,8 @@ export default function PhotoSlot({ src, onAdd, onRemove, size = "100%" }) {
       <input
         ref={inputRef}
         type="file"
+        aria-label={label}
+        tabIndex={-1}
         accept="image/*"
         style={{ display: "none" }}
         onChange={async (e) => {
