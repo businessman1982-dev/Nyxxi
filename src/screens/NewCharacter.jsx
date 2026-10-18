@@ -25,7 +25,7 @@ export default function NewCharacter({ nav, addCharacter, limits, gate }) {
             <PhotoSlot key={i} src={s} onRemove={() => setSheets(sheets.filter((_, j) => j !== i))} />
           ))}
           {sheets.length < maxSheets && (
-            <PhotoSlot onAdd={(url) => setSheets([...sheets, url])} />
+            <PhotoSlot label="Add character sheet image" onAdd={(url) => setSheets([...sheets, url])} />
           )}
         </div>
 

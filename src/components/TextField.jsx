@@ -1,9 +1,18 @@
-export default function TextField({ label, value, onChange, placeholder, area, rows = 3 }) {
+import { useId } from "react";
+
+export default function TextField({ label, value, onChange, placeholder, area, rows = 3, ariaLabel }) {
+  const id = useId();
+  const a11y = label ? { id } : { "aria-label": ariaLabel || placeholder };
   return (
     <div style={{ marginBottom: 18 }}>
-      {label && <p style={{ fontSize: 12, color: "var(--text-secondary)", margin: "0 0 8px" }}>{label}</p>}
+      {label && (
+        <label htmlFor={id} style={{ display: "block", fontSize: 12, color: "var(--text-secondary)", margin: "0 0 8px" }}>
+          {label}
+        </label>
+      )}
       {area ? (
         <textarea
+          {...a11y}
           rows={rows}
           value={value}
           placeholder={placeholder}
@@ -12,6 +21,7 @@ export default function TextField({ label, value, onChange, placeholder, area, r
         />
       ) : (
         <input
+          {...a11y}
           type="text"
           value={value}
           placeholder={placeholder}
