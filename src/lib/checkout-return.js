@@ -28,7 +28,9 @@ export function readReturnParams(search) {
  * Apply a post-payment return URL (`/app/?plan=studio&session_id=cs_...`).
  * Asks `/api/checkout` to verify the session when that function answers JSON.
  * An HTML response means the function isn't deployed (local Vite); the plan
- * named in the URL is stored anyway. A JSON rejection is never overridden.
+ * named in the URL is stored anyway. A 5xx or Cloudflare's plain-text
+ * "error code: 502" page is a failed check, not a missing function — it must
+ * not unlock the hinted plan. A JSON rejection is never overridden.
  */
 export async function claimCheckoutReturn(search = window.location.search) {
   const params = readReturnParams(search);
@@ -40,6 +42,7 @@ export async function claimCheckoutReturn(search = window.location.search) {
     else if (params.sessionId) q.set("session_id", params.sessionId.slice(0, 200));
     if (params.plan) q.set("plan", params.plan);
     const res = await fetch(`/api/checkout?${q.toString()}`, { headers: { Accept: "application/json" } });
+    if (res.status >= 500) return fail("stripe_unreachable");
     const type = res.headers.get("content-type") || "";
     if (!type.includes("application/json")) return acceptHint(params.plan);
     const data = await res.json();

@@ -161,7 +161,7 @@ To check the payment with Stripe before unlocking, add one runtime variable on t
 - No rebuild is required for the function to see it. Changing a `VITE_CHECKOUT_*` link still needs a redeploy.
 - The function is `functions/api/checkout.js`, route `/api/checkout`. Pages picks up the `functions/` directory next to the `dist` build. Don't move it into `dist` yourself.
 
-Until the key is set, the return URL still unlocks whatever `plan` it names. Anyone who knows that URL can unlock a plan on their own browser.
+Until the key is set, the return URL still unlocks whatever `plan` it names. Anyone who knows that URL can unlock a plan on their own browser. With the key set, a rejected session, an unpaid session, or a failure to reach Stripe leaves the browser on Free. A 502 page from Cloudflare is not treated as a successful payment.
 
 With the key set, Nyxxi loads the Checkout Session and unlocks the plan whose price matches the amount Stripe recorded: Studio $19 / $190, Agency $79 / $790 (USD, before tax — `amount_subtotal`). A buyer who edits `?plan=` in the address bar does not get a different plan when the amount matches. If you change a price, update `src/lib/plan-prices.js`, or set the Payment Link's metadata `plan` to `studio` or `agency`. Use a **live** key for live Payment Links and a **test** key for test-mode links — a mismatch rejects the session.
 
