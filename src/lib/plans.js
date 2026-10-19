@@ -1,7 +1,12 @@
 // Plan catalogue. Limits here are enforced in the app; prices are rendered on the
-// landing page. Keep the two in sync — the offer only works if the gate is real.
+// landing page. Dollar amounts come from plan-prices.js, which checkout
+// verification also uses — the offer only works if the gate is real.
+
+import { PLAN_PRICES_CENTS } from "./plan-prices.js";
 
 export const PLAN_ORDER = ["free", "studio", "agency"];
+
+const dollars = (cents) => cents / 100;
 
 export const PLANS = {
   free: {
@@ -23,13 +28,16 @@ export const PLANS = {
     id: "studio",
     name: "Studio",
     tagline: "For the creator running this daily.",
-    price: { monthly: 19, yearly: 190 },
+    price: {
+      monthly: dollars(PLAN_PRICES_CENTS.studio.monthly),
+      yearly: dollars(PLAN_PRICES_CENTS.studio.yearly),
+    },
     limits: { characters: Infinity, prompts: Infinity, assets: Infinity, sheets: 6 },
     features: [
       "Unlimited characters & prompts",
       "6 reference sheets per character",
       "Unlimited asset vault",
-      "Cloud sync across devices",
+      "Cloud sync across devices (coming soon)",
       "Bulk export of prompts & assets",
       "Priority support",
     ],
@@ -40,7 +48,10 @@ export const PLANS = {
     id: "agency",
     name: "Agency",
     tagline: "For teams shipping for clients.",
-    price: { monthly: 79, yearly: 790 },
+    price: {
+      monthly: dollars(PLAN_PRICES_CENTS.agency.monthly),
+      yearly: dollars(PLAN_PRICES_CENTS.agency.yearly),
+    },
     limits: { characters: Infinity, prompts: Infinity, assets: Infinity, sheets: 12 },
     features: [
       "Everything in Studio",
@@ -57,20 +68,33 @@ export const PLANS = {
 
 // Vite inlines `import.meta.env.VITE_*` at build time, so these have to be written
 // out statically — a computed lookup would resolve to undefined in production.
+const env = import.meta.env ?? {};
 const CHECKOUT = {
   studio: {
-    monthly: import.meta.env.VITE_CHECKOUT_STUDIO_MONTHLY,
-    yearly: import.meta.env.VITE_CHECKOUT_STUDIO_YEARLY,
+    monthly: env.VITE_CHECKOUT_STUDIO_MONTHLY,
+    yearly: env.VITE_CHECKOUT_STUDIO_YEARLY,
   },
   agency: {
-    monthly: import.meta.env.VITE_CHECKOUT_AGENCY_MONTHLY,
-    yearly: import.meta.env.VITE_CHECKOUT_AGENCY_YEARLY,
+    monthly: env.VITE_CHECKOUT_AGENCY_MONTHLY,
+    yearly: env.VITE_CHECKOUT_AGENCY_YEARLY,
   },
 };
 
 /** Hosted checkout link for a plan, or "" when none is configured yet. */
 export function checkoutUrl(planId, cycle) {
-  return CHECKOUT[planId]?.[cycle] || "";
+  const base = CHECKOUT[planId]?.[cycle] || "";
+  if (!base) return "";
+  try {
+    const url = new URL(base);
+    // Copied onto the Checkout Session. Verification prefers the charged amount
+    // over this, because the buyer can edit the query string.
+    if (!url.searchParams.has("client_reference_id") && (planId === "studio" || planId === "agency")) {
+      url.searchParams.set("client_reference_id", planId);
+    }
+    return url.toString();
+  } catch {
+    return base;
+  }
 }
 
 /** Monthly-equivalent price when billed yearly. */
@@ -95,9 +119,13 @@ export function loadPlan() {
 }
 
 export function savePlan(id) {
+  if (!id || !PLANS[id]) return false;
   try {
     localStorage.setItem(PLAN_KEY, id);
-  } catch {}
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 /**

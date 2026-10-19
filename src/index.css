@@ -156,6 +156,46 @@ button {
   opacity: 0.8;
 }
 
+.save-banner,
+.plan-banner {
+  border-radius: 12px;
+  font-size: 13px;
+  line-height: 1.5;
+  margin: 0 0 12px;
+  padding: 12px 14px;
+}
+
+.save-banner {
+  background: var(--bg-accent);
+  border: 0.5px solid #d4537e;
+  color: var(--text-primary);
+}
+
+.plan-banner {
+  background: var(--bg-accent);
+  border: 0.5px solid var(--border-accent);
+  color: var(--text-primary);
+}
+
+.save-banner strong,
+.plan-banner strong {
+  display: block;
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+
+.plan-banner button,
+.save-banner button {
+  background: transparent;
+  border: none;
+  color: var(--text-accent);
+  cursor: pointer;
+  display: block;
+  font-size: 12px;
+  margin-top: 8px;
+  padding: 0;
+}
+
 .sr-only {
   position: absolute;
   width: 1px;

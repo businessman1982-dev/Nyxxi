@@ -96,9 +96,13 @@ carrying the reason that triggered it — including saving a prompt out of **Com
 Once a quota passes 60%, the dashboard shows a single progress nudge: the tightest
 quota only, so the app never stacks upsells.
 
-> The current plan is read from `localStorage` and there is no server, so the gate is a
-> product surface, not a security boundary. Real enforcement arrives with the backend
-> that issues the entitlement — the same backend Studio's cloud sync is sold on.
+> The current plan is stored in this browser's `localStorage`. After a Stripe Payment
+> Link, the buyer must land on `/app/?plan=studio&session_id={CHECKOUT_SESSION_ID}`
+> (or `agency`) — see [DEPLOY.md](DEPLOY.md). With `STRIPE_SECRET_KEY` set, a Pages
+> Function checks that checkout session before unlocking. Without the key, the `plan`
+> in the URL is stored as-is, so the gate is still a product surface, not a security
+> boundary. A plan does not follow you to another device. Cloud sync is listed on
+> Studio as coming soon; it is not shipped.
 
 ## Configuration
 
@@ -166,8 +170,9 @@ or `http://localhost:5173/app/` for the app.
 - [React 19](https://react.dev) + [Vite](https://vite.dev) (multi-page build)
 - [GSAP](https://gsap.com) + ScrollTrigger and [Lenis](https://lenis.darkroom.engineering)
   for the landing page
-- No backend — state persists to `localStorage`. Photos are stored as data URLs, so
-  very large images can hit browser storage limits; a real backend/CDN is the natural
-  next step.
+- No backend — state persists to `localStorage`. Photos are downscaled and compressed
+  to JPEG before they're stored. A format the browser can't decode (HEIC in Chrome,
+  for example) is kept as-is. If a save still fails, the app shows a banner instead
+  of dropping the change silently.
 - The **Generate** button is currently a simulation that drops a placeholder into the
   asset vault — wiring it to a real image-generation API is the next milestone.

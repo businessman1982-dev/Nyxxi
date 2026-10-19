@@ -1,8 +1,9 @@
-import { useRef } from "react";
-import { fileToDataUrl } from "../lib/utils.js";
+import { useRef, useState } from "react";
+import { preparePhoto } from "../lib/images.js";
 
 export default function PhotoSlot({ src, onAdd, onRemove, size = "100%", label = "Add photo" }) {
   const inputRef = useRef(null);
+  const [busy, setBusy] = useState(false);
   if (src) {
     return (
       <div style={{ position: "relative", width: size, aspectRatio: "1" }}>
@@ -28,8 +29,12 @@ export default function PhotoSlot({ src, onAdd, onRemove, size = "100%", label =
       role="button"
       tabIndex={0}
       aria-label={label}
-      onClick={() => inputRef.current?.click()}
+      aria-busy={busy}
+      onClick={() => {
+        if (!busy) inputRef.current?.click();
+      }}
       onKeyDown={(e) => {
+        if (busy) return;
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
           inputRef.current?.click();
@@ -41,7 +46,7 @@ export default function PhotoSlot({ src, onAdd, onRemove, size = "100%", label =
         cursor: "pointer", flexDirection: "column", gap: 4,
       }}
     >
-      <span style={{ fontSize: 20 }}>+</span>
+      <span style={{ fontSize: busy ? 12 : 20 }}>{busy ? "Preparing…" : "+"}</span>
       <input
         ref={inputRef}
         type="file"
@@ -51,11 +56,16 @@ export default function PhotoSlot({ src, onAdd, onRemove, size = "100%", label =
         style={{ display: "none" }}
         onChange={async (e) => {
           const file = e.target.files?.[0];
-          if (file) {
-            const url = await fileToDataUrl(file);
-            onAdd(url);
-          }
           e.target.value = "";
+          if (!file) return;
+          setBusy(true);
+          try {
+            onAdd(await preparePhoto(file));
+          } catch (err) {
+            console.error("photo failed", err);
+          } finally {
+            setBusy(false);
+          }
         }}
       />
     </div>

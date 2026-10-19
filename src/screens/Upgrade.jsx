@@ -45,8 +45,8 @@ export default function Upgrade({ nav, route, onExitToSite }) {
           Take the ceiling off.
         </p>
         <p style={{ fontSize: 13, lineHeight: 1.6, color: "var(--text-secondary)", margin: "0 0 20px" }}>
-          Unlimited characters and prompts, {plan.limits.sheets} reference sheets each, and cloud
-          sync so your vault follows you between devices.
+          Unlimited characters and prompts, and {plan.limits.sheets} reference sheets each. Your
+          vault stays in this browser — cloud sync across devices is coming soon.
         </p>
 
         <div style={{ display: "flex", gap: 6, marginBottom: 18 }}>
@@ -105,6 +105,12 @@ export default function Upgrade({ nav, route, onExitToSite }) {
           >
             ✦ Upgrade to Studio
           </Button>
+        )}
+
+        {href && (
+          <p style={{ fontSize: 12, color: "var(--text-muted)", margin: "10px 0 0", lineHeight: 1.5 }}>
+            After payment, Stripe sends you back here and Studio unlocks in this browser.
+          </p>
         )}
 
         <Button variant="ghost" style={{ marginTop: 8 }} onClick={() => onExitToSite("#rates")}>
