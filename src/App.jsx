@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { loadState, saveState, loadTheme, saveTheme } from "./lib/storage.js";
 import { loadPlan, PLANS, quota } from "./lib/plans.js";
+import { claimCheckoutReturn } from "./lib/checkout-return.js";
 import { track } from "./lib/leads.js";
 import { uid } from "./lib/utils.js";
 import { buildDemo } from "./lib/demo.js";
@@ -25,11 +26,25 @@ export default function App() {
   const [route, setRoute] = useState({ screen: "dashboard" });
   const [search, setSearch] = useState("");
   const [theme, setTheme] = useState(loadTheme);
-  const [plan] = useState(loadPlan);
+  const [plan, setPlan] = useState(loadPlan);
+  const [saveError, setSaveError] = useState(false);
+  const [planNotice, setPlanNotice] = useState(null);
 
   useEffect(() => {
-    saveState(state);
+    setSaveError(!saveState(state).ok);
   }, [state]);
+
+  useEffect(() => {
+    let live = true;
+    claimCheckoutReturn().then((result) => {
+      if (!live || !result) return;
+      if (result.ok && result.plan) setPlan(result.plan);
+      setPlanNotice(result);
+    });
+    return () => {
+      live = false;
+    };
+  }, []);
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
@@ -175,6 +190,24 @@ export default function App() {
           </button>
         </div>
       </div>
+      {saveError && (
+        <div className="save-banner" role="alert">
+          <strong>Couldn't save your vault.</strong>
+          These changes are only on this screen and will disappear if you leave. Storage may be
+          full, or this browser may not keep data — Instagram and TikTok's in-app browsers and
+          private mode often don't. Open nyxxi.io in Safari, Chrome, or Firefox, or remove a photo
+          and stay here until this message disappears.
+        </div>
+      )}
+      {planNotice && (
+        <div className={planNotice.ok ? "plan-banner" : "save-banner"} role="status">
+          <strong>{planNotice.title}</strong>
+          {planNotice.message}
+          <button type="button" onClick={() => setPlanNotice(null)}>
+            Dismiss
+          </button>
+        </div>
+      )}
       <main className="app-card">{screen}</main>
     </div>
   );

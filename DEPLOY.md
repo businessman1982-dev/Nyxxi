@@ -132,6 +132,41 @@ step 5 and redeploy.
 Every push to the production branch rebuilds and redeploys. Pull requests get their own
 preview URL, so you can look at a change before it's live.
 
+### Unlock a plan after Stripe
+
+The buy buttons go to Stripe Payment Links. Stripe does not tell the app about the
+sale unless you send the buyer back to Nyxxi. On **each** Payment Link:
+
+1. Stripe Dashboard → **Payment Links** → open the link.
+2. **After payment**, redirect to your website instead of stopping on Stripe's confirmation page.
+3. Paste the URL below. Leave `{CHECKOUT_SESSION_ID}` written exactly like that — Stripe replaces it.
+
+| Payment Link | Redirect URL |
+| --- | --- |
+| Studio monthly | `https://nyxxi.io/app/?plan=studio&session_id={CHECKOUT_SESSION_ID}` |
+| Studio yearly | `https://nyxxi.io/app/?plan=studio&session_id={CHECKOUT_SESSION_ID}` |
+| Agency monthly | `https://nyxxi.io/app/?plan=agency&session_id={CHECKOUT_SESSION_ID}` |
+| Agency yearly | `https://nyxxi.io/app/?plan=agency&session_id={CHECKOUT_SESSION_ID}` |
+
+That stores the plan in the browser that finished checkout. It does not follow the buyer to another device. Cloud sync is not built; Studio says so.
+
+To check the payment with Stripe before unlocking, add one runtime variable on the Pages project (**Settings → Environment variables**). This is **not** a `VITE_` variable — those are baked into the public JavaScript.
+
+| Name | Value |
+| --- | --- |
+| `STRIPE_SECRET_KEY` | Secret key `sk_live_...`, or a restricted key that can **read Checkout Sessions** |
+
+- Scope: **Production** (and **Preview** if preview URLs should verify too).
+- Mark it encrypted / secret.
+- No rebuild is required for the function to see it. Changing a `VITE_CHECKOUT_*` link still needs a redeploy.
+- The function is `functions/api/checkout.js`, route `/api/checkout`. Pages picks up the `functions/` directory next to the `dist` build. Don't move it into `dist` yourself.
+
+Until the key is set, the return URL still unlocks whatever `plan` it names. Anyone who knows that URL can unlock a plan on their own browser.
+
+With the key set, Nyxxi loads the Checkout Session and unlocks the plan whose price matches the amount Stripe recorded: Studio $19 / $190, Agency $79 / $790 (USD, before tax — `amount_subtotal`). A buyer who edits `?plan=` in the address bar does not get a different plan when the amount matches. If you change a price, update `src/lib/plan-prices.js`, or set the Payment Link's metadata `plan` to `studio` or `agency`. Use a **live** key for live Payment Links and a **test** key for test-mode links — a mismatch rejects the session.
+
+The in-app Studio button and the landing-page buttons use the same Payment Links, so one redirect URL per link covers both.
+
 ---
 
 ## What's in the repo for this
@@ -142,4 +177,5 @@ preview URL, so you can look at a change before it's live.
 | `public/_redirects` | Sends `/app` to `/app/`.                                               |
 | `wrangler.toml`   | Only for deploying from your own machine with `npx wrangler pages deploy`. The GitHub integration ignores it and uses the dashboard settings. |
 | `scripts/lead-sink.gs` | The Google Sheets endpoint from part 1.                             |
-| `.env.example`    | Every variable, with notes. Copy to `.env` for local development.         |
+| `.env.example`    | Every Vite variable, with notes. Copy to `.env` for local development. `STRIPE_SECRET_KEY` is documented there but belongs in the Pages dashboard, not in `.env`. |
+| `functions/api/checkout.js` | Confirms a Stripe Checkout Session and tells the app which plan to unlock. |

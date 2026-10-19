@@ -29,13 +29,16 @@ function rateCard(plan, cycle) {
       ? `Billed $${plan.price.yearly} yearly.`
       : "Billed monthly. Cancel anytime.";
 
+  // A configured Payment Link wins over the mailto fallback, so Agency can
+  // actually be bought when VITE_CHECKOUT_AGENCY_* is set.
+  const label = href && plan.contact ? `Start ${plan.name}` : plan.cta;
   const cta = free
     ? `<a class="rate__cta" href="/app/" data-plan="free">${escape(plan.cta)}${ARROW}</a>`
-    : plan.contact
-      ? `<a class="rate__cta" href="${escape(plan.contact)}" data-plan="${plan.id}">${escape(plan.cta)}${ARROW}</a>`
-      : href
-      ? `<a class="rate__cta" href="${escape(href)}" data-plan="${plan.id}" data-checkout="1">${escape(plan.cta)}${ARROW}</a>`
-      : `<button class="rate__cta" type="button" data-plan="${plan.id}">${escape(plan.cta)}${ARROW}</button>`;
+    : href
+      ? `<a class="rate__cta" href="${escape(href)}" data-plan="${plan.id}" data-checkout="1">${escape(label)}${ARROW}</a>`
+      : plan.contact
+        ? `<a class="rate__cta" href="${escape(plan.contact)}" data-plan="${plan.id}">${escape(plan.cta)}${ARROW}</a>`
+        : `<button class="rate__cta" type="button" data-plan="${plan.id}">${escape(plan.cta)}${ARROW}</button>`;
 
   return `
     <div class="rate ${plan.highlight ? "rate--featured" : ""}">

@@ -16,9 +16,12 @@ export function loadState() {
 export function saveState(state) {
   try {
     localStorage.setItem(STATE_KEY, JSON.stringify(state));
+    return { ok: true };
   } catch (e) {
-    // Most likely quota exceeded from large photo data URLs.
+    // Quota exceeded, or a browser that refuses storage (private mode,
+    // Instagram/TikTok in-app browsers). The caller surfaces this.
     console.error("save failed", e);
+    return { ok: false };
   }
 }
 
