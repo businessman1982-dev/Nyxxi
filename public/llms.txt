@@ -1,0 +1,42 @@
+# Nyxxi
+
+> One place for AI creators to keep prompts, images, and lock character looks and wardrobe.
+
+Nyxxi is an AI Creator OS by Twisted Flame Productions. A creator keeps their cast, the looks and wardrobe that lock a character, saved prompts, and the images they generate in one place. It runs in the browser. No account is required, and the vault stays on that device. Studio lists cloud sync across devices as coming soon.
+
+## Plans
+
+Prices are USD. A year is ten times the monthly price (two months free). Limits below are what the app enforces.
+
+### Free — $0
+
+- 2 characters
+- 10 saved prompts
+- 25 assets in the vault
+- 2 reference sheets per character
+- Wardrobe + character sheets
+- Stored in your browser
+
+### Studio — $19 per month, or $190 per year
+
+- Unlimited characters & prompts
+- 6 reference sheets per character
+- Unlimited asset vault
+- Cloud sync across devices (coming soon)
+- Bulk export of prompts & assets
+- Priority support
+
+### Agency — $79 per month, or $790 per year
+
+- Everything in Studio
+- 12 reference sheets per character
+- 5 seats included
+- Client workspaces with separate vaults
+- Shared brand kits & prompt templates
+- API access
+- Onboarding call
+
+## URLs
+
+- Home: https://nyxxi.io/
+- App: https://nyxxi.io/app/
