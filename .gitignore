@@ -26,3 +26,6 @@ dist-ssr
 # Nyxxi bot runtime data
 bot/profile_data/
 bot/post_index.txt
+bot/drafts/
+__pycache__/
+*.pyc

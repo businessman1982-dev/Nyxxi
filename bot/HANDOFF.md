@@ -8,13 +8,20 @@
 I run an AI music/creator persona called **Nyxxi** (label: Twisted Flame
 Records). I want a **semi-automated social posting bot**: it should pick the
 newest finished `.mp4` video from a folder, attach a rotating caption + hashtags,
-open the social site in a real browser, upload the video, and fill in the
-caption — then I review and click **Post/Share** myself. Posting is intentionally
-*assisted*, not fully hands-off.
+and then stop for me to approve. Posting is intentionally *assisted*, not fully
+hands-off. Nothing publishes unless I explicitly say so.
 
-Two target platforms:
-- **TikTok** (`nyxxi_bot.py`) — the original target.
-- **Instagram** (`nyxxi_bot_instagram.py`) — added because TikTok blocks the login.
+Supported Instagram path (use this):
+- `nyxxi_bot_instagram_draft.py` parks a pending draft. No browser, no API.
+- `nyxxi_bot_instagram_publish.py` only records approval when I pass
+  `--i-approve-publish` or set `NYXXI_CONFIRM_PUBLISH=1`. It still does not post.
+- The live post is made by **Nyxxi Build** with Composio / Instagram Graph API
+  after I say yes in chat. Composio is not wired inside these scripts.
+
+Older browser scripts, still in the folder:
+- **TikTok** (`nyxxi_bot.py`) — Playwright. Login is often blocked.
+- **Instagram** (`nyxxi_bot_instagram.py`) — Playwright. Still available, and
+  blocked by Instagram login detection. Not the supported publish path.
 
 ## 2. Tech stack / environment
 
@@ -23,46 +30,75 @@ Two target platforms:
   `headless=False` so I can watch and finish manually.
 - A **persistent browser profile** folder so my login survives between runs
   (log in once; reused afterward).
-- No servers, no APIs, no stored passwords. I am not a programmer — I run it from
+- No servers and no stored passwords. I am not a programmer — I run it from
   Command Prompt.
+- The Instagram draft and approve scripts are standard-library only. They do
+  not call Instagram or Composio. Nyxxi Build does the Graph API call after I
+  say yes.
 
-## 3. How it works (shared logic, both scripts)
+## 3. How it works (shared logic)
+
+The inbox and caption helpers live in `nyxxi_common.py`. TikTok, Playwright
+Instagram, and the Instagram draft script all import them.
 
 1. `get_next_video_file(BASE_DIR)` scans the media-inbox folder for `.mp4` files,
    newest first, and waits until a file's size stops changing (so it doesn't grab
    a video that's still copying in). It then **moves** that file to a `media_out`
-   folder (so it won't be re-posted) and returns it.
+   folder (so it won't be re-posted) and returns `(filename, path)`.
 2. `get_next_static_caption(STATIC_POSTS)` rotates through a hardcoded list of 6
    caption + hashtag sets, remembering its place in `post_index.txt`.
-3. `upload_video_full_flow(...)` launches Edge, goes to the upload page, waits for
-   login, sets the video on the page's hidden `<input type=file>`, fills the
-   caption, then stops for manual posting.
+3. Instagram draft: write `drafts/pending_instagram.json` (`platform=instagram`,
+   `status=pending_approval`) and stop. No browser, no publish API.
+4. Instagram approve: `nyxxi_bot_instagram_publish.py` refuses unless
+   `NYXXI_CONFIRM_PUBLISH=1` or `--i-approve-publish`. With that flag it marks
+   the draft `approved` and `published: false`. It does not call Composio.
+5. Playwright only: `upload_video_full_flow(...)` launches Edge, goes to the
+   upload page, waits for login, sets the video on the page's hidden
+   `<input type=file>`, fills the caption, then stops for manual posting.
 
 ## 4. Folder layout on my PC
 
 ```
 C:\Users\reneg\OneDrive\Desktop\nyxxi_bot.ok\
     media_inbox\     <- I drop finished .mp4 videos here
-    media_out\       <- bot moves posted videos here
-    nyxxi_bot_new.py          (the TikTok script)
-    nyxxi_bot_instagram.py    (the Instagram script)
+    media_out\       <- bot moves chosen videos here
+    drafts\pending_instagram.json   <- parked Instagram draft
+    nyxxi_common.py                 (shared inbox + captions)
+    nyxxi_bot.py                    (TikTok Playwright)
+    nyxxi_bot_instagram.py          (Instagram Playwright — login-blocked)
+    nyxxi_bot_instagram_draft.py    (park a draft; does not publish)
+    nyxxi_bot_instagram_publish.py  (record approval; does not publish)
     profile_data\    <- auto-created; stores the browser login
     post_index.txt   <- auto-created; caption rotation state
 ```
 Paths are overridable via env vars: `NYXXI_MEDIA_INBOX`, `NYXXI_MEDIA_OUT`,
-`NYXXI_INDEX_FILE`, `NYXXI_PROFILE_DIR` (Instagram also: `NYXXI_AUTO_SHARE=1`).
+`NYXXI_INDEX_FILE`, `NYXXI_DRAFT_FILE`, `NYXXI_PROFILE_DIR`
+(Playwright Instagram also: `NYXXI_AUTO_SHARE=1`; approval also:
+`NYXXI_CONFIRM_PUBLISH=1`; optional public video URL: `NYXXI_VIDEO_URL`).
 
 ## 5. How I run it
+
+```bat
+cd C:\Users\reneg\OneDrive\Desktop\nyxxi_bot.ok
+
+python nyxxi_bot_instagram_draft.py
+python nyxxi_bot_instagram_publish.py --i-approve-publish
+```
+
+The draft command needs no pip install. The publish command only marks the
+draft approved. It does not post. Say yes in chat to **Nyxxi Build** for the
+live Composio publish (see section 8).
+
+Playwright scripts (still present; login is the blocker):
 
 ```bat
 pip install playwright
 playwright install msedge
 
-cd C:\Users\reneg\OneDrive\Desktop\nyxxi_bot.ok
-python nyxxi_bot_new.py            (TikTok)
-python nyxxi_bot_instagram.py      (Instagram)
+python nyxxi_bot.py              (TikTok)
+python nyxxi_bot_instagram.py    (Instagram — blocked by login detection)
 ```
-First run: a browser opens; I log in manually, then press ENTER in the terminal.
+First Playwright run: a browser opens; I log in manually, then press ENTER.
 
 ## 6. THE CURRENT BLOCKER (what I need help with)
 
@@ -71,20 +107,13 @@ certainly TikTok's anti-automation / bot detection rejecting the login. (The old
 upload URL `/creator-center/upload` was also dead and is now fixed to
 `/tiktokstudio/upload`, but the login wall is the live problem.)
 
-I pivoted to **Instagram**, which may hit the *same* automated-login detection.
-Instagram's web uploader is also DOM-fragile (obfuscated class names), so that
-script clicks as far as it can and falls back to manual steps instead of crashing.
+Playwright **Instagram** (`nyxxi_bot_instagram.py`) hits the same kind of
+login detection. That script is still in the folder for manual experiments.
+It is not how posts go out.
 
-### Questions for the helping AI
-- How to get past automated-login / bot detection on TikTok & Instagram — e.g.
-  log in manually in the *same* persistent profile first, reduce automation
-  fingerprints, reuse cookies, or avoid browser automation entirely.
-- Is an **official API** the better path? (TikTok Content Posting API; Instagram
-  Graph API needs a Business/Creator account + a Meta app + review.) What's the
-  simplest route for a non-developer?
-- How to make the Instagram click-through (Create -> Post -> Next -> Next ->
-  caption -> Share) robust against Instagram's frequent UI changes.
-- Any safer/simpler scheduler or third-party posting service worth using instead.
+The supported route avoids Playwright login. The local scripts park a draft
+and record approval. **Nyxxi Build** publishes with Composio after I say yes
+in chat. See section 8. Do not bypass the approval gate.
 
 ## 7. Where the code lives
 
@@ -93,13 +122,48 @@ GitHub repo `businessman1982-dev/Nyxxi`, branch
 
 Raw file links (view/download):
 - TikTok: https://raw.githubusercontent.com/businessman1982-dev/Nyxxi/claude/bot-posting-automation-yn8sp1/bot/nyxxi_bot.py
-- Instagram: https://raw.githubusercontent.com/businessman1982-dev/Nyxxi/claude/bot-posting-automation-yn8sp1/bot/nyxxi_bot_instagram.py
+- Instagram Playwright: https://raw.githubusercontent.com/businessman1982-dev/Nyxxi/claude/bot-posting-automation-yn8sp1/bot/nyxxi_bot_instagram.py
+
+Current files in `bot/` (source of truth): `nyxxi_common.py`,
+`nyxxi_bot.py`, `nyxxi_bot_instagram.py`, `nyxxi_bot_instagram_draft.py`,
+`nyxxi_bot_instagram_publish.py`.
+
+## 8. Instagram draft, then Composio after owner yes
+
+Run:
+
+```bat
+python nyxxi_bot_instagram_draft.py
+python nyxxi_bot_instagram_publish.py --i-approve-publish
+```
+
+Draft JSON fields include `video_filename`, absolute `video_path` (after the
+move to media_out), full `caption`, `created_at`, `platform` = `instagram`,
+`status` = `pending_approval`. Approval flips status to `approved` and sets
+`published` to false. Neither script publishes.
+
+Live publish, only after I say yes in chat to **Nyxxi Build**:
+
+1. Composio tool `INSTAGRAM_POST_IG_USER_MEDIA`
+2. Composio tool `INSTAGRAM_POST_IG_USER_MEDIA_PUBLISH`
+3. ig_user_id `27944815738476357` / @nyxxi_blaze
+
+The Graph API needs a public HTTPS URL or a Composio `video_file` s3key.
+That upload is an ops step for Nyxxi Build. The local script does not solve
+it and does not contain Composio credentials. Optional: set `NYXXI_VIDEO_URL`
+to store a URL on the draft.
 
 ---
 
-## 8. COMPLETE CODE (exact, current)
+## 9. PLAYWRIGHT SOURCE (historical inline copy)
 
-### 8a. `nyxxi_bot.py` — TikTok
+The inbox and caption helpers were extracted to `nyxxi_common.py`. The live
+TikTok and Playwright Instagram scripts import that module. The listings
+below are the earlier self-contained copies of those Playwright flows. Read
+the files in `bot/` for the current source. The Instagram draft and approve
+scripts are not inlined here; their behavior is section 8.
+
+### 9a. `nyxxi_bot.py` — TikTok
 
 ```python
 import asyncio
@@ -435,7 +499,7 @@ if __name__ == "__main__":
         print(f"\n[FATAL ERROR] {e}")
 ```
 
-### 8b. `nyxxi_bot_instagram.py` — Instagram
+### 9b. `nyxxi_bot_instagram.py` — Instagram
 
 ```python
 import asyncio
