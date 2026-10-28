@@ -1,0 +1,3 @@
+{"stills": {"hf01_16x9": "d7f306ac-7536-496d-b494-c442a21591c8", "hf01_9x16": "dad87271-0bc7-4821-9eb3-cecb4e1d9430", "hf02_16x9": "209703a3-c276-495d-a7d1-f43832388b48", "hf02_9x16": "c1521829-4293-4c0e-9763-fcb9ef2a9406"},
+ "videos": {"hf01_open_16x9": "13fc7b3e-d791-424c-bc37-f47aaff69ec3", "hf01_open_9x16": "b58157e6-bed3-4cc7-ba8d-d584390da70e", "hf02_close_16x9": "1f4b435a-7ba0-49cf-aea0-133285c00e6d", "hf02_close_9x16": "8a09de24-2741-4aff-ab1d-f06d757c0505"},
+ "model": "seedance_2_5, omni_reference, start_image, 5s, 1080p, no audio"}

@@ -1,0 +1,10 @@
+out/layerB_*.mp4
+out/overlay_*.mov
+out/sfx_stem_raw.wav
+out/work-*
+out/render_log.txt
+assets/hf/*.mp4
+assets/hf/*.png
+template/main_*.html
+template/overlay_*.html
+node_modules/

@@ -1,0 +1,45 @@
+{
+  "header": {
+    "term": "> sample_audit --target nyxxi.io",
+    "titlePrefix": "Sample audit: ",
+    "titleTarget": "nyxxi.io"
+  },
+  "status": {
+    "lead": "Status: 8 of 10 issues fully fixed, 2 partly fixed.",
+    "body": " Fixes shipped Oct 17, 2026, the day after the audit. We re-checked the live site on Oct 18 (headless Chrome + Lighthouse): Accessibility, Best Practices and SEO all score 100. Still open: a share preview image (#4) and mobile animation work (#10). This is exactly what a $25 audit delivers: the top 10 issues ranked by user impact, each with a fix prompt you can paste into Cursor or Lovable."
+  },
+  "section": "Top 10 issues, ranked by user impact",
+  "issues": {
+    "2": {
+      "title": "2. Paid plans couldn't be bought",
+      "badges": [["High (revenue)", "red"], ["Fixed", "green"]],
+      "what": "The checkout link map was empty, so \"Start Studio\" and \"Upgrade to Studio\" only led to a waitlist, and \"Talk to us\" (Agency, $79/mo) had no contact route. The price cards and \"Upgrade\" wording overpromised.",
+      "repro": "Open the app, click \"Upgrade to Studio\". You landed on the homepage instead of a checkout.",
+      "fix": "Set the Studio monthly/yearly and Agency price links to real Stripe Payment Links so \"Start Studio\" and \"Upgrade to Studio\" open checkout. Until those exist, relabel the buttons \"Join Studio waitlist\", mark the price cards \"Coming soon\", and make \"Talk to us\" a mailto: link or contact form.",
+      "recheckLabel": "Re-check Oct 18"
+    },
+    "1": { "title": "1. Social icons link to generic homepages", "badges": [["High", "red"], ["Fixed", "green"]] },
+    "3": { "title": "3. Fixed header overlapped content on mobile", "badges": [["Medium", "amber"], ["Fixed", "green"]] },
+    "5": { "title": "5. robots.txt and sitemap.xml returned the homepage", "badges": [["Medium (SEO)", "amber"], ["Fixed", "green"]] },
+    "6": { "title": "6. Unknown URLs returned the homepage instead of a 404", "badges": [["Low-Medium", "amber"], ["Fixed", "green"]] },
+    "7": { "title": "7. App form fields had no labels", "badges": [["Medium (accessibility)", "amber"], ["Fixed", "green"]] },
+    "4": {
+      "title": "4. Missing share image and tags (og:image, Twitter card, canonical)",
+      "badges": [["Medium", "amber"], ["Partly fixed", "amber"]],
+      "recheckLabel": "Re-check Oct 18:",
+      "recheck": " canonical, og:url, og:site_name and Twitter tags are live and the app page is noindexed. No og:image yet, so shared links still show no preview image."
+    }
+  },
+  "labels": { "what": "What:", "repro": "Repro:", "copied": "Copied" },
+  "hook": ["You vibe-coded it.", "Did anyone check it?"],
+  "close": ["Audit.", "Fix prompt.", "Fixed."],
+  "cta": {
+    "heading": "Want this for your app?",
+    "sub": "Top 10 issues + fix prompts within 24 hours.",
+    "primary": "Get my audit for $25",
+    "secondary": "Audit + re-check $79",
+    "refund": "Full refund within 7 days if the audit isn't useful."
+  },
+  "wordmark": ["vibe", "audit"],
+  "url": "vibeaudit.us"
+}
